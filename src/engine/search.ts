@@ -1,0 +1,122 @@
+// Bölüm 7 — Arama & Keşif: serbest metin + filtreler + sıralama
+import type { Parfum, ProfilVektoru, Aile, Mevsim, Ortam, Cinsiyet, Fiyat } from "./types";
+import { AILE_ETIKET } from "./types";
+import { NOTALAR, notaAd } from "../data/notes";
+import { puanla } from "./recommend";
+
+export interface AramaFiltre {
+  metin: string;
+  aile?: Aile;
+  nota?: string;
+  mevsim?: Mevsim;
+  ortam?: Ortam;
+  cinsiyet?: Cinsiyet;
+  butce?: Fiyat;
+  nis?: "nis" | "designer";
+  siralama: "uygunluk" | "populerlik" | "yenilik" | "fiyat";
+}
+
+export const BOS_FILTRE: AramaFiltre = { metin: "", siralama: "uygunluk" };
+
+const kucult = (s: string) => s.toLocaleLowerCase("tr");
+
+// "koku", "parfüm" gibi ayırt edici olmayan kelimeler puanlamada yok sayılır
+const DUR_KELIMELER = new Set([
+  "koku", "kokusu", "kokular", "parfum", "parfüm", "bir", "icin", "için", "ve", "gibi",
+]);
+
+const MEVSIM_KELIME: Record<string, string[]> = {
+  ilkbahar: ["ilkbahar", "bahar"],
+  yaz: ["yaz", "yazlık", "yazlik"],
+  sonbahar: ["sonbahar", "güz"],
+  kis: ["kış", "kis", "kışlık", "kislik"],
+};
+const ORTAM_KELIME: Record<string, string[]> = {
+  gunluk: ["günlük", "gunluk"],
+  is: ["iş", "ofis"],
+  gece: ["gece"],
+  ozel: ["özel", "davet"],
+  spor: ["spor"],
+};
+
+function metinPuani(p: Parfum, sorgu: string): number {
+  if (!sorgu.trim()) return 1;
+  const kelimeler = kucult(sorgu)
+    .split(/\s+/)
+    .filter((k) => k && !DUR_KELIMELER.has(k));
+  if (kelimeler.length === 0) return 1;
+
+  const parcalar = [
+    kucult(p.ad),
+    kucult(p.marka),
+    ...[...p.notalar.tepe, ...p.notalar.kalp, ...p.notalar.dip].map((n) => kucult(notaAd(n))),
+    ...Object.keys(p.aileler).map((a) => kucult(AILE_ETIKET[a as Aile])),
+  ];
+  for (const [m, sozler] of Object.entries(MEVSIM_KELIME)) {
+    if (p.mevsim[m as Mevsim] >= 0.6) parcalar.push(...sozler);
+  }
+  for (const [o, sozler] of Object.entries(ORTAM_KELIME)) {
+    if ((p.ortam[o as Ortam] ?? 0) >= 0.6) parcalar.push(...sozler);
+  }
+  const hedef = parcalar.join(" ");
+
+  let puan = 0;
+  for (const k of kelimeler) {
+    if (hedef.includes(k)) {
+      puan += 1;
+      continue;
+    }
+    // "vanilyalı" → "vanilya" gibi Türkçe ekleri kademeli kırparak toleransla
+    for (let kes = 1; kes <= 3 && k.length - kes >= 4; kes++) {
+      if (hedef.includes(k.slice(0, k.length - kes))) {
+        puan += 0.8;
+        break;
+      }
+    }
+  }
+  return puan / kelimeler.length;
+}
+
+const FIYAT_SIRA = { ekonomik: 0, orta: 1, luks: 2 } as const;
+
+export function ara(
+  katalog: Parfum[],
+  f: AramaFiltre,
+  profil: ProfilVektoru | null
+): Parfum[] {
+  let sonuc = katalog.filter((p) => {
+    if (f.aile && !(p.aileler[f.aile] && p.aileler[f.aile]! >= 0.4)) return false;
+    if (f.nota) {
+      const hepsi = [...p.notalar.tepe, ...p.notalar.kalp, ...p.notalar.dip];
+      if (!hepsi.includes(f.nota)) return false;
+    }
+    if (f.mevsim && p.mevsim[f.mevsim] < 0.6) return false;
+    if (f.ortam && (p.ortam[f.ortam] ?? 0) < 0.6) return false;
+    if (f.cinsiyet && p.cinsiyet !== f.cinsiyet && p.cinsiyet !== "unisex") return false;
+    if (f.butce && p.fiyat_seviyesi !== f.butce) return false;
+    if (f.nis === "nis" && !p.nis_mi) return false;
+    if (f.nis === "designer" && p.nis_mi) return false;
+    return metinPuani(p, f.metin) >= 0.5;
+  });
+
+  const uygunluk = (p: Parfum) =>
+    (profil ? puanla(profil, p) : p.populerlik) + metinPuani(p, f.metin) * 0.5;
+
+  switch (f.siralama) {
+    case "uygunluk":
+      sonuc.sort((a, b) => uygunluk(b) - uygunluk(a));
+      break;
+    case "populerlik":
+      sonuc.sort((a, b) => b.populerlik - a.populerlik);
+      break;
+    case "yenilik":
+      sonuc.sort((a, b) => b.yil - a.yil);
+      break;
+    case "fiyat":
+      sonuc.sort((a, b) => FIYAT_SIRA[a.fiyat_seviyesi] - FIYAT_SIRA[b.fiyat_seviyesi]);
+      break;
+  }
+  return sonuc;
+}
+
+export { NOTALAR };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "./state/store";
 import { Aurora } from "./components/ui";
+import { sayfaGecisi } from "./components/gecis";
 import { Karsilama } from "./screens/Karsilama";
 import { Anket } from "./screens/Anket";
 import { Onerilerim } from "./screens/Onerilerim";
@@ -13,6 +14,11 @@ export default function App() {
   const { hesap } = useStore();
   const [anketAcik, setAnketAcik] = useState(false);
   const [sekme, setSekme] = useState<Sekme>("onerilerim");
+
+  const sekmeyeGec = (s: Sekme) => {
+    if (s !== sekme) sayfaGecisi(() => setSekme(s));
+  };
+  const anketiAc = () => sayfaGecisi(() => setAnketAcik(true), "ileri");
 
   // Mevsime göre değişen arka plan tonu (Bölüm 10 — küçük dokunuşlar)
   useEffect(() => {
@@ -40,9 +46,9 @@ export default function App() {
               Frag <em>Tasting</em>
             </span>
             <nav className="sekmeler">
-              <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => setSekme("onerilerim")}>Senin Seçkin</SekmeBtn>
-              <SekmeBtn aktif={sekme === "kesfet"} onClick={() => setSekme("kesfet")}>Keşfet</SekmeBtn>
-              <SekmeBtn aktif={sekme === "profil"} onClick={() => setSekme("profil")}>Profil</SekmeBtn>
+              <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
+              <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
+              <SekmeBtn aktif={sekme === "profil"} onClick={() => sekmeyeGec("profil")}>Profil</SekmeBtn>
             </nav>
           </div>
         </header>
@@ -50,32 +56,34 @@ export default function App() {
 
       <main className="kabuk">
         {!hesap ? (
-          <Karsilama onDevam={() => setAnketAcik(true)} />
+          <Karsilama onDevam={anketiAc} />
         ) : !hesap.profil || anketAcik ? (
           <Anket
-            onBitti={() => {
-              setAnketAcik(false);
-              setSekme("onerilerim");
-            }}
+            onBitti={() =>
+              sayfaGecisi(() => {
+                setAnketAcik(false);
+                setSekme("onerilerim");
+              }, "ileri")
+            }
           />
         ) : sekme === "onerilerim" ? (
-          <Onerilerim onAnketeDon={() => setAnketAcik(true)} />
+          <Onerilerim onAnketeDon={anketiAc} />
         ) : sekme === "kesfet" ? (
           <Kesfet />
         ) : (
-          <Profil onAnketeDon={() => setAnketAcik(true)} />
+          <Profil onAnketeDon={anketiAc} />
         )}
       </main>
 
       {girisliVeAnketli && (
         <nav className="altBar">
-          <button className={`sekme ${sekme === "onerilerim" ? "aktif" : ""}`} onClick={() => setSekme("onerilerim")}>
+          <button className={`sekme ${sekme === "onerilerim" ? "aktif" : ""}`} onClick={() => sekmeyeGec("onerilerim")}>
             <span className="ikon">✦</span>Seçkin
           </button>
-          <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => setSekme("kesfet")}>
+          <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => sekmeyeGec("kesfet")}>
             <span className="ikon">⌕</span>Keşfet
           </button>
-          <button className={`sekme ${sekme === "profil" ? "aktif" : ""}`} onClick={() => setSekme("profil")}>
+          <button className={`sekme ${sekme === "profil" ? "aktif" : ""}`} onClick={() => sekmeyeGec("profil")}>
             <span className="ikon">♡</span>Profil
           </button>
         </nav>

@@ -523,6 +523,61 @@ h1, h2, h3, .serif {
   .sisePlaka { display: none; }
 }
 
+/* ---------- Sayfa geçişleri (View Transition API) ---------- */
+/* Sekme değişimi: eski kare sabit kalır, yeni kare üstüne yumuşakça girer
+   (iki kareyi aynı anda soldurmak araya karanlık "çukur" sokar) */
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  animation: 300ms vtSolgunGir both var(--ease);
+}
+@keyframes vtSolgunGir {
+  from { opacity: 0; }
+}
+
+/* Anket sorusu: yönlü kaydırma — ileri sola, geri sağa akar */
+.anketSoru { view-transition-name: soru; }
+
+html[data-gecis="ileri"]::view-transition-old(soru) {
+  animation: 240ms vtSolaCik both var(--ease);
+}
+html[data-gecis="ileri"]::view-transition-new(soru) {
+  animation: 400ms vtSagdanGir both var(--ease);
+}
+html[data-gecis="geri"]::view-transition-old(soru) {
+  animation: 240ms vtSagaCik both var(--ease);
+}
+html[data-gecis="geri"]::view-transition-new(soru) {
+  animation: 400ms vtSoldanGir both var(--ease);
+}
+@keyframes vtSolaCik {
+  to { opacity: 0; transform: translateX(-36px); filter: blur(4px); }
+}
+@keyframes vtSagaCik {
+  to { opacity: 0; transform: translateX(36px); filter: blur(4px); }
+}
+@keyframes vtSagdanGir {
+  from { opacity: 0; transform: translateX(44px); }
+}
+@keyframes vtSoldanGir {
+  from { opacity: 0; transform: translateX(-44px); }
+}
+
+/* View Transition desteklemeyen tarayıcılar: adım değişiminde giriş animasyonu */
+@supports not (view-transition-name: soru) {
+  .soruGecis { animation: yukari var(--dur) var(--ease) both; }
+}
+
+/* Hareket azaltma tercihi: tüm animasyonlar ve geçişler kapanır */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ince kaydırma çubukları */
 ::-webkit-scrollbar { width: 10px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 8px; }

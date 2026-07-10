@@ -7,6 +7,7 @@ import {
 import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
 import { KATALOG } from "../data/catalog";
 import { useStore } from "../state/store";
+import { sayfaGecisi } from "../components/gecis";
 
 const BOS: AnketCevaplari = {
   yas: "25-34",
@@ -35,15 +36,19 @@ export function Anket({ onBitti }: { onBitti: () => void }) {
   const ilerleme = ((adim + 1) / adimlar.length) * 100;
 
   function ileri() {
-    if (adim < adimlar.length - 1) setAdim(adim + 1);
+    if (adim < adimlar.length - 1) sayfaGecisi(() => setAdim(adim + 1), "ileri");
     else {
       anketiKaydet(cevap);
       onBitti();
     }
   }
 
+  function geri() {
+    if (adim > 0) sayfaGecisi(() => setAdim(adim - 1), "geri");
+  }
+
   return (
-    <div className="anket girisAnim" key={adim}>
+    <div className="anket girisAnim">
       <div className="ilerlemeKap">
         <div className="ilerlemeYol">
           <div className="ilerlemeDolgu" style={{ width: `${ilerleme}%` }} />
@@ -51,7 +56,7 @@ export function Anket({ onBitti }: { onBitti: () => void }) {
         <span className="ilerlemeSayi">{adim + 1} / {adimlar.length}</span>
       </div>
 
-      <div className="anketSoru girisAnim">
+      <div className="anketSoru soruGecis" key={adim}>
         <span className="ustBaslik">{mevcut.grup}</span>
         <h2>{mevcut.soru}</h2>
         {mevcut.aciklama && <p className="aciklama">{mevcut.aciklama}</p>}
@@ -59,7 +64,7 @@ export function Anket({ onBitti }: { onBitti: () => void }) {
       </div>
 
       <div className="anketNav">
-        <button className="atlaBtn" onClick={() => (adim > 0 ? setAdim(adim - 1) : null)} style={{ visibility: adim > 0 ? "visible" : "hidden" }}>
+        <button className="atlaBtn" onClick={geri} style={{ visibility: adim > 0 ? "visible" : "hidden" }}>
           ← Geri
         </button>
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>

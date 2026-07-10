@@ -48,8 +48,15 @@ export default function App() {
             <nav className="sekmeler">
               <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
-              <SekmeBtn aktif={sekme === "profil"} onClick={() => sekmeyeGec("profil")}>Profil</SekmeBtn>
             </nav>
+            <button
+              className={`avatar ${sekme === "profil" ? "aktif" : ""}`}
+              onClick={() => sekmeyeGec("profil")}
+              title={`${hesap.ad} — profilim`}
+              aria-label="Profilim"
+            >
+              {hesap.ad.trim().charAt(0).toLocaleUpperCase("tr") || "🙂"}
+            </button>
           </div>
         </header>
       )}

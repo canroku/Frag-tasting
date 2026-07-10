@@ -523,6 +523,107 @@ h1, h2, h3, .serif {
   .sisePlaka { display: none; }
 }
 
+/* ---------- Şişe görselleri ---------- */
+.siseSahne {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  height: 150px;
+  margin: -8px -8px 4px;
+  border-radius: 16px;
+  background:
+    radial-gradient(80% 90% at 50% 110%, color-mix(in srgb, var(--sahne) 32%, transparent), transparent 75%),
+    radial-gradient(60% 60% at 75% 0%, rgba(251, 247, 241, 0.05), transparent 70%),
+    rgba(18, 5, 16, 0.35);
+  cursor: pointer;
+  transition: all 260ms var(--ease);
+  overflow: hidden;
+}
+.siseSahne:hover { background-color: rgba(18, 5, 16, 0.2); }
+.siseSahne:hover .sise { transform: translateY(-4px) rotate(-2deg) scale(1.04); }
+.sise { height: 118px; width: auto; transition: transform 320ms var(--ease); filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.4)); }
+.siseBuyuk { height: 150px; }
+.sahneSkor { position: absolute; top: 10px; right: 10px; }
+
+.rozetEmoji { font-size: 12px; }
+.cipEmoji { font-size: 15px; }
+.yildiz { color: var(--amber-bright); font-weight: 700; }
+
+/* ---------- Nota seçici grupları ---------- */
+.notaGruplar { display: flex; flex-direction: column; gap: 20px; max-height: 52vh; overflow-y: auto; padding-right: 6px; }
+.notaGrupBaslik {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--cream-60); margin-bottom: 9px;
+}
+
+/* ---------- Profil avatarı ---------- */
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose-deep), var(--accent));
+  color: var(--cream); font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent;
+  transition: all 200ms var(--ease);
+  flex-shrink: 0;
+}
+.avatar:hover { transform: scale(1.08); }
+.avatar.aktif { border-color: var(--cream); box-shadow: 0 0 0 3px var(--accent-soft); }
+@media (max-width: 720px) { .avatar { margin-left: auto; } }
+
+/* ---------- Detay vitrini & topluluk blokları ---------- */
+.detayVitrin {
+  display: flex; gap: 22px; align-items: flex-end;
+  padding: 22px 20px 18px;
+  margin: 6px 0 16px;
+  border-radius: 18px;
+  background:
+    radial-gradient(90% 110% at 30% 115%, color-mix(in srgb, var(--sahne) 30%, transparent), transparent 75%),
+    rgba(18, 5, 16, 0.35);
+}
+.detayVitrin .sise { flex-shrink: 0; }
+.tanitim { color: var(--cream-60); font-size: 14.5px; line-height: 1.65; margin-bottom: 20px; }
+.tanitim::first-letter { color: var(--accent); }
+
+.toplulukIzgara { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+@media (max-width: 620px) { .toplulukIzgara { grid-template-columns: 1fr; } }
+.toplulukKutu {
+  border: 1px solid var(--hairline); border-radius: var(--radius-sm);
+  padding: 16px 16px 12px; background: var(--surface);
+}
+.toplulukKutu h4 {
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--cream-60); margin-bottom: 12px; font-weight: 700;
+}
+.oySutunlar { display: flex; flex-direction: column; gap: 8px; }
+.oySutun { display: grid; grid-template-columns: 22px 74px 1fr auto; gap: 8px; align-items: center; font-size: 12px; color: var(--cream-60); }
+.oyEmoji { font-size: 14px; text-align: center; }
+.oyEtiket { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.oyYol { height: 6px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.oyDolgu { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--rose-deep), var(--rose)); }
+.oyDolgu.yesilDolgu { background: linear-gradient(90deg, var(--green), var(--accent)); }
+.oySayi { font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--cream-40); min-width: 34px; text-align: right; }
+
+/* ---------- Günün Kokusu ---------- */
+.gununKokusu {
+  display: flex; gap: 26px; align-items: center;
+  padding: 26px clamp(20px, 4vw, 36px);
+  margin-top: 28px;
+  background:
+    radial-gradient(70% 120% at 12% 110%, color-mix(in srgb, var(--sahne) 26%, transparent), transparent 70%),
+    var(--surface);
+  overflow: hidden;
+}
+.gununKokusu h2 { font-size: clamp(26px, 4vw, 38px); margin-top: 2px; }
+.gununSise { flex-shrink: 0; animation: hafifYuzer 5s ease-in-out infinite alternate; }
+@keyframes hafifYuzer {
+  from { transform: translateY(0) rotate(-1.5deg); }
+  to { transform: translateY(-8px) rotate(1.5deg); }
+}
+@media (max-width: 560px) { .gununKokusu { flex-direction: column; align-items: flex-start; } }
+
+.benzerSise { display: flex; justify-content: center; margin-bottom: 8px; }
+.benzerSise .sise { height: 64px; }
+
 /* ---------- Sayfa geçişleri (View Transition API) ---------- */
 /* Sekme değişimi: eski kare sabit kalır, yeni kare üstüne yumuşakça girer
    (iki kareyi aynı anda soldurmak araya karanlık "çukur" sokar) */

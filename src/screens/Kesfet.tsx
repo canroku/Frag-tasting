@@ -35,7 +35,8 @@ export function Kesfet() {
         <span className="sayi">{sonuclar.length} sonuç</span>
       </div>
       <p className="bolumAlt">
-        Adıyla, markayla veya "vanilyalı kış kokusu" gibi serbest metinle ara.
+        Katalogdaki {KATALOG.length} parfümün tamamına buradan ulaşırsın — adıyla,
+        markayla veya "vanilyalı kış kokusu" gibi serbest metinle ara.
       </p>
 
       <div className="aramaSatir">

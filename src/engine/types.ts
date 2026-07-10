@@ -32,6 +32,20 @@ export const AILELER: Aile[] = [
   "deri",
 ];
 
+// Şişe görselleri ve etiketler için aile renkleri
+export const AILE_RENK: Record<Aile, string> = {
+  narenciye: "#e8c547",
+  cicek: "#d98ca6",
+  odunsu: "#a1785a",
+  amber: "#d99b6a",
+  fujer: "#7fa98a",
+  sipr: "#8a7f5c",
+  gurme: "#d9a05b",
+  aromatik: "#6da8c9",
+  yesil: "#5b9b7a",
+  deri: "#8f7361",
+};
+
 export const AILE_ETIKET: Record<Aile, string> = {
   narenciye: "Narenciye / Fresh",
   cicek: "Çiçeksi",

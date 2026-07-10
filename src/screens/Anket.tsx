@@ -2,9 +2,11 @@
 import { useMemo, useState } from "react";
 import type { AnketCevaplari, Cinsiyet, Deneyim, Fiyat, Mevsim, Ortam } from "../engine/types";
 import {
-  KISILIK_SORULARI, ANKET_NOTALARI, YAS_ARALIKLARI, AYLAR,
+  KISILIK_SORULARI, HIZLI_SORULAR, YAS_ARALIKLARI, AYLAR,
 } from "../data/survey";
-import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
+import {
+  NOTALAR, KATEGORI_RENK, KATEGORI_ETIKET, KATEGORI_SIRA,
+} from "../data/notes";
 import { KATALOG } from "../data/catalog";
 import { useStore } from "../state/store";
 import { sayfaGecisi } from "../components/gecis";
@@ -202,12 +204,12 @@ function anketAdimlari(
     ),
   });
 
-  // ---- B) Kişilik & Tarz ----
-  for (const soru of KISILIK_SORULARI) {
+  // ---- B) Kişilik & Tarz + Hızlı Seçim ----
+  for (const soru of [...KISILIK_SORULARI, ...HIZLI_SORULAR]) {
     adimlar.push({
-      grup: "Kişilik & Tarz",
+      grup: soru.grup,
       soru: soru.soru,
-      aciklama: "Birden fazla seçebilirsin.",
+      aciklama: soru.aciklama ?? "Birden fazla seçebilirsin.",
       hazir: true,
       atlanabilir: true,
       icerik: (
@@ -230,33 +232,22 @@ function anketAdimlari(
     });
   }
 
-  // ---- C) Koku Tercihleri ----
+  // ---- C) Koku Tercihleri: tüm nota evreni, kategorilere ayrılmış ----
   adimlar.push({
     grup: "Koku Tercihleri",
     soru: "Hangi notaları seviyorsun?",
-    aciklama: "Algoritmanın en güçlü sinyali — bol seç.",
+    aciklama: "Algoritmanın en güçlü sinyali — bol seç, kategorilere göz at.",
     hazir: c.sevilen_notalar.length > 0,
     icerik: (
-      <div className="cipKume">
-        {ANKET_NOTALARI.map((n) => {
-          const nota = NOTA_MAP[n];
-          return (
-            <button
-              key={n}
-              className={`cip ${c.sevilen_notalar.includes(n) ? "secili" : ""}`}
-              onClick={() =>
-                g({
-                  sevilen_notalar: cokluToggle(c.sevilen_notalar, n),
-                  sevilmeyen_notalar: c.sevilmeyen_notalar.filter((x) => x !== n),
-                })
-              }
-            >
-              <span className="notaRenk" style={{ background: nota ? KATEGORI_RENK[nota.kategori] : "#999" }} />
-              {notaAd(n)}
-            </button>
-          );
-        })}
-      </div>
+      <NotaSecici
+        secili={c.sevilen_notalar}
+        onSec={(n) =>
+          g({
+            sevilen_notalar: cokluToggle(c.sevilen_notalar, n),
+            sevilmeyen_notalar: c.sevilmeyen_notalar.filter((x) => x !== n),
+          })
+        }
+      />
     ),
   });
 
@@ -267,17 +258,12 @@ function anketAdimlari(
     hazir: true,
     atlanabilir: true,
     icerik: (
-      <div className="cipKume">
-        {ANKET_NOTALARI.filter((n) => !c.sevilen_notalar.includes(n)).map((n) => (
-          <button
-            key={n}
-            className={`cip negatif ${c.sevilmeyen_notalar.includes(n) ? "secili" : ""}`}
-            onClick={() => g({ sevilmeyen_notalar: cokluToggle(c.sevilmeyen_notalar, n) })}
-          >
-            {notaAd(n)}
-          </button>
-        ))}
-      </div>
+      <NotaSecici
+        secili={c.sevilmeyen_notalar}
+        haric={c.sevilen_notalar}
+        negatif
+        onSec={(n) => g({ sevilmeyen_notalar: cokluToggle(c.sevilmeyen_notalar, n) })}
+      />
     ),
   });
 
@@ -391,6 +377,48 @@ function anketAdimlari(
   });
 
   return adimlar;
+}
+
+// Tüm nota evreni, kategori başlıklarıyla — emoji + renk kodlu çipler
+function NotaSecici({
+  secili,
+  onSec,
+  haric = [],
+  negatif = false,
+}: {
+  secili: string[];
+  onSec: (n: string) => void;
+  haric?: string[];
+  negatif?: boolean;
+}) {
+  return (
+    <div className="notaGruplar">
+      {KATEGORI_SIRA.map((kat) => {
+        const grup = NOTALAR.filter((n) => n.kategori === kat && !haric.includes(n.id));
+        if (grup.length === 0) return null;
+        return (
+          <div key={kat} className="notaGrup">
+            <div className="notaGrupBaslik">
+              <span className="notaRenk" style={{ background: KATEGORI_RENK[kat] }} />
+              {KATEGORI_ETIKET[kat]}
+            </div>
+            <div className="cipKume">
+              {grup.map((n) => (
+                <button
+                  key={n.id}
+                  className={`cip ${negatif ? "negatif" : ""} ${secili.includes(n.id) ? "secili" : ""}`}
+                  onClick={() => onSec(n.id)}
+                >
+                  <span className="cipEmoji">{n.emoji}</span>
+                  {n.ad}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function TohumSecici({ secili, onDegis }: { secili: string[]; onDegis: (t: string[]) => void }) {

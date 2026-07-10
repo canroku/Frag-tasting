@@ -4,7 +4,8 @@ import { KATALOG } from "../data/catalog";
 import { oneriUret } from "../engine/recommend";
 import type { Oneri } from "../engine/types";
 import { useStore } from "../state/store";
-import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum } from "../components/ui";
+import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum, SiseGorsel, SkorHalka } from "../components/ui";
+import { AILE_RENK, AILE_ETIKET, type Aile } from "../engine/types";
 
 export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
   const { hesap, oneriGecmisineEkle } = useStore();
@@ -51,8 +52,15 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
     );
   }
 
+  // Günün Kokusu: seçkiden güne göre dönen vitrin (her gün farklı)
+  const gunIndeksi = Math.floor(Date.now() / 86400000) % Math.max(oneriler.length, 1);
+  const gununKokusu = oneriler[gunIndeksi];
+
   return (
     <div className="girisAnim">
+      {gununKokusu && (
+        <GununKokusu oneri={gununKokusu} onDetay={detay.ac} />
+      )}
       <div className="bolumBaslik">
         <h2>Senin Seçkin</h2>
         <span className="sayi">{oneriler.length} parfüm · sana göre puanlandı</span>
@@ -86,5 +94,37 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
         <DetayPanel parfum={detay.acik} onKapat={detay.kapat} onBenzerSec={detay.ac} />
       )}
     </div>
+  );
+}
+
+function GununKokusu({ oneri, onDetay }: { oneri: Oneri; onDetay: (p: Oneri["parfum"]) => void }) {
+  const p = oneri.parfum;
+  const anaAile = (Object.entries(p.aileler).sort(
+    (a, b) => (b[1] as number) - (a[1] as number)
+  )[0]?.[0] ?? "amber") as Aile;
+
+  return (
+    <section
+      className="gununKokusu cam"
+      style={{ ["--sahne" as string]: AILE_RENK[anaAile] }}
+    >
+      <div className="gununSise">
+        <SiseGorsel parfum={p} buyuk />
+      </div>
+      <div className="gununIcerik">
+        <span className="ustBaslik">✦ Günün Kokusu</span>
+        <div className="pMarka" style={{ marginTop: 10 }}>{p.marka}</div>
+        <h2 className="serif">{p.ad}</h2>
+        <div className="etiketSira" style={{ margin: "8px 0 12px" }}>
+          <span className="etiket">{AILE_ETIKET[anaAile]}</span>
+          <span className="etiket notr">{p.nis_mi ? "Niş" : "Designer"}</span>
+        </div>
+        {oneri.neden[0] && <p className="minik" style={{ marginBottom: 16 }}>{oneri.neden[0]}.</p>}
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button className="btn btnAna btnKucuk" onClick={() => onDetay(p)}>Bugün bunu dene</button>
+          <SkorHalka oran={oneri.skor} />
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,7 +1,7 @@
 // Bölüm 4 + 6.1 + 6.6 — Anket cevaplarını tercih vektörüne çevirme ve tohum harmanı
 import type { AnketCevaplari, ProfilVektoru, Aile, Mevsim, Ortam } from "./types";
 import { AILELER } from "./types";
-import { KISILIK_SORULARI, AY_MEVSIM } from "../data/survey";
+import { KISILIK_SORULARI, HIZLI_SORULAR, AY_MEVSIM } from "../data/survey";
 import { PARFUM_MAP } from "../data/catalog";
 import { parfumNotaVektoru, clamp01 } from "./vector";
 
@@ -14,13 +14,18 @@ export function profilVektoru(cevap: AnketCevaplari): ProfilVektoru {
   const nota: Record<string, number> = {};
   for (const n of cevap.sevilen_notalar) nota[n] = 1.0;
 
-  // --- Aile vektörü: kişilik/tarz cevapları aile puanı toplar (Bölüm 4B)
+  // --- Aile vektörü: kişilik/tarz + hızlı seçim cevapları aile puanı toplar (Bölüm 4B)
   const aile = bosAile();
-  for (const soru of KISILIK_SORULARI) {
+  for (const soru of [...KISILIK_SORULARI, ...HIZLI_SORULAR]) {
     for (const sec of soru.secenekler) {
       if (!cevap.kisilik.includes(`${soru.id}:${sec.id}`)) continue;
       for (const [a, w] of Object.entries(sec.aileler)) {
         aile[a as Aile] += w as number;
+      }
+      // seçeneğin nota sinyali: açıkça seçilen notaları ezmeden yumuşak ekle
+      for (const n of sec.notalar ?? []) {
+        if (cevap.sevilmeyen_notalar.includes(n)) continue;
+        nota[n] = Math.max(nota[n] ?? 0, 0.65);
       }
     }
   }

@@ -75,6 +75,10 @@ export interface Parfum {
   fiyat_seviyesi: Fiyat;
   populerlik: number; // crowd-pleaser sinyali
   fragrantica_url: string;
+  // Lisanslı gerçek ürün fotoğrafı (opsiyonel). Ayarlanırsa illüstrasyon
+  // yerine bu görsel gösterilir. Telifli görseller katalogda tutulmaz;
+  // alan, kendi lisanslı görsellerinizi bağlamanız içindir.
+  gorsel_url?: string;
 }
 
 // Anket cevapları (Bölüm 4)

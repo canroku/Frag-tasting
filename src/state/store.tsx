@@ -25,6 +25,7 @@ export interface Hesap {
   tiklananlar: string[];
   oneriGecmisi: string[]; // tekrarları azaltmak için
   geriBildirim: Record<string, "begen" | "begenme">;
+  duello_sayisi?: number; // Koku Düellosu tur sayısı (rozetler için)
 }
 
 const HESAP_KEY = "frag_hesaplar_v1";
@@ -63,6 +64,7 @@ interface StoreDegerleri {
   tiklamaKaydet: (id: string) => void;
   oneriGecmisineEkle: (ids: string[]) => void;
   geriBildirimVer: (id: string, tur: "begen" | "begenme") => void;
+  duelloKaydet: (kazananId: string) => void;
 }
 
 const StoreContext = createContext<StoreDegerleri | null>(null);
@@ -192,6 +194,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         guncelle((h) => ({
           ...h,
           oneriGecmisi: [...new Set([...h.oneriGecmisi, ...ids])].slice(-200),
+        }));
+      },
+      duelloKaydet(kazananId) {
+        guncelle((h) => ({
+          ...h,
+          duello_sayisi: (h.duello_sayisi ?? 0) + 1,
+          // düello galibi, öğrenen sisteme "beğen" sinyali olarak akar (Bölüm 6.8)
+          profil: h.profil ? geriBildirimUygula(h.profil, kazananId, "begen") : h.profil,
         }));
       },
       geriBildirimVer(id, tur) {

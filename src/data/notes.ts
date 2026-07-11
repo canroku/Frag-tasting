@@ -80,6 +80,18 @@ export const NOTALAR: Nota[] = [
   { id: "feslegen", ad: "Fesleğen", kategori: "yesil" , emoji: "🌿" },
   { id: "kakao", ad: "Kakao", kategori: "tatli", emoji: "🍫" },
   { id: "seker_kamisi", ad: "Şeker Kamışı", kategori: "tatli", emoji: "🎋" },
+  { id: "gardenya", ad: "Gardenya", kategori: "cicek", emoji: "🌼" },
+  { id: "sumbul", ad: "Sümbül", kategori: "cicek", emoji: "🪻" },
+  { id: "benzoin", ad: "Benzoin", kategori: "recine", emoji: "🪔" },
+  { id: "biberiye", ad: "Biberiye", kategori: "yesil", emoji: "🌿" },
+  { id: "konyak", ad: "Konyak", kategori: "tatli", emoji: "🥃" },
+  { id: "rom", ad: "Rom", kategori: "tatli", emoji: "🥃" },
+  { id: "hurma", ad: "Hurma", kategori: "meyve", emoji: "🌴" },
+  { id: "ambrette", ad: "Ambrette", kategori: "hayvansal", emoji: "🌾" },
+  { id: "ardic", ad: "Ardıç", kategori: "yesil", emoji: "🌲" },
+  { id: "muskat", ad: "Muskat", kategori: "baharat", emoji: "🌰" },
+  { id: "kisnis", ad: "Kişniş", kategori: "baharat", emoji: "🌿" },
+  { id: "nilufer", ad: "Nilüfer", kategori: "cicek", emoji: "🪷" },
 ];
 
 export const NOTA_MAP: Record<string, Nota> = Object.fromEntries(

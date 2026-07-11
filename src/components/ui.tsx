@@ -61,14 +61,27 @@ function idHash(metin: string): number {
 }
 
 export function SiseGorsel({ parfum, buyuk = false }: { parfum: Parfum; buyuk?: boolean }) {
+  // Lisanslı gerçek ürün fotoğrafı tanımlıysa onu kullan
+  if (parfum.gorsel_url) {
+    return (
+      <img
+        src={parfum.gorsel_url}
+        alt={`${parfum.marka} ${parfum.ad} şişesi`}
+        className={buyuk ? "sise siseBuyuk siseFoto" : "sise siseFoto"}
+        loading="lazy"
+      />
+    );
+  }
+
   const aileler = Object.entries(parfum.aileler).sort(
     (a, b) => (b[1] as number) - (a[1] as number)
   );
   const renk1 = AILE_RENK[(aileler[0]?.[0] ?? "amber") as Aile];
   const renk2 = AILE_RENK[(aileler[1]?.[0] ?? aileler[0]?.[0] ?? "odunsu") as Aile];
   const h = idHash(parfum.id);
-  const sekil = h % 4; // 4 şişe silüeti
-  const dolum = 62 + (h % 20); // şişedeki parfüm seviyesi
+  const sekil = h % 4;
+  const dolum = 58 + (h % 26); // şişedeki parfüm seviyesi (%)
+  const koyu = h % 3 === 0; // bazı şişeler koyu camdan
   const bas = parfum.marka
     .split(/\s+/)
     .map((k) => k[0])
@@ -76,54 +89,105 @@ export function SiseGorsel({ parfum, buyuk = false }: { parfum: Parfum; buyuk?: 
     .slice(0, 2)
     .toLocaleUpperCase("tr");
 
-  // silüet parametreleri: [gövde x, gövde geniş, gövde rx, boyun geniş]
+  // silüetler: gövde x/geniş/köşe, omuz eğimi, boyun ve kapak oranı
   const s = [
-    { x: 22, w: 56, rx: 8, boyun: 14 },
-    { x: 27, w: 46, rx: 20, boyun: 12 },
-    { x: 18, w: 64, rx: 5, boyun: 18 },
-    { x: 25, w: 50, rx: 12, boyun: 10 },
+    { x: 22, w: 56, rx: 7, omuz: 10, boyun: 14, kapakH: 15, kapakYuvarlak: 2 },
+    { x: 27, w: 46, rx: 21, omuz: 4, boyun: 11, kapakH: 20, kapakYuvarlak: 6 },
+    { x: 18, w: 64, rx: 4, omuz: 14, boyun: 18, kapakH: 11, kapakYuvarlak: 1.5 },
+    { x: 25, w: 50, rx: 12, omuz: 7, boyun: 10, kapakH: 24, kapakYuvarlak: 5 },
   ][sekil];
   const gid = `g${parfum.id}`;
+  const gTop = 30;
+  const gH = 92;
+  const dolumY = gTop + s.omuz + ((gH - s.omuz) * (100 - dolum)) / 100;
 
   return (
     <svg
-      viewBox="0 0 100 130"
+      viewBox="0 0 100 138"
       className={buyuk ? "sise siseBuyuk" : "sise"}
       role="img"
       aria-label={`${parfum.ad} şişe illüstrasyonu`}
     >
       <defs>
-        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={renk1} stopOpacity="0.95" />
-          <stop offset="100%" stopColor={renk2} stopOpacity="0.75" />
+        {/* parfüm sıvısı: yüzeyde açık, dipte doygun */}
+        <linearGradient id={gid} x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stopColor={renk1} stopOpacity="0.72" />
+          <stop offset="55%" stopColor={renk1} stopOpacity="0.92" />
+          <stop offset="100%" stopColor={renk2} stopOpacity="0.98" />
         </linearGradient>
-        <linearGradient id={`${gid}c`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f5ecdf" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#b9a893" stopOpacity="0.9" />
+        {/* cam: kenarlarda yoğun, ortada saydam */}
+        <linearGradient id={`${gid}g`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#fbf7f1" stopOpacity="0.28" />
+          <stop offset="12%" stopColor="#fbf7f1" stopOpacity="0.05" />
+          <stop offset="50%" stopColor="#fbf7f1" stopOpacity="0.1" />
+          <stop offset="88%" stopColor="#0a0208" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#0a0208" stopOpacity="0.4" />
         </linearGradient>
+        {/* metalik kapak */}
+        <linearGradient id={`${gid}c`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#8f8272" />
+          <stop offset="30%" stopColor="#f0e6d6" />
+          <stop offset="55%" stopColor="#c4b49d" />
+          <stop offset="80%" stopColor="#7d7060" />
+          <stop offset="100%" stopColor="#5c5245" />
+        </linearGradient>
+        <radialGradient id={`${gid}s`} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="#000" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0" />
+        </radialGradient>
       </defs>
-      {/* kapak */}
-      <rect x={50 - s.boyun / 2 - 4} y="6" width={s.boyun + 8} height="16" rx="3" fill={`url(#${gid}c)`} />
+
+      {/* zemin gölgesi */}
+      <ellipse cx="50" cy="128" rx={s.w / 2 + 4} ry="6" fill={`url(#${gid}s)`} />
+
+      {/* kapak + bilezik */}
+      <rect x={50 - s.boyun / 2 - 4.5} y={24 - s.kapakH} width={s.boyun + 9} height={s.kapakH} rx={s.kapakYuvarlak} fill={`url(#${gid}c)`} />
+      <rect x={50 - s.boyun / 2 - 2.5} y="24" width={s.boyun + 5} height="4" rx="1.5" fill="#9c8d78" />
+
       {/* boyun */}
-      <rect x={50 - s.boyun / 2} y="20" width={s.boyun} height="12" fill={`url(#${gid})`} opacity="0.7" />
-      {/* gövde camı */}
-      <rect x={s.x} y="30" width={s.w} height="92" rx={s.rx} fill="rgba(251,247,241,0.08)" stroke="rgba(251,247,241,0.25)" strokeWidth="1.5" />
-      {/* parfüm dolumu */}
-      <rect
-        x={s.x + 3}
-        y={30 + (92 * (100 - dolum)) / 100}
-        width={s.w - 6}
-        height={(92 * dolum) / 100 - 3}
-        rx={Math.max(3, s.rx - 4)}
-        fill={`url(#${gid})`}
+      <rect x={50 - s.boyun / 2} y="27" width={s.boyun} height={gTop - 27 + s.omuz} fill={`url(#${gid}g)`} stroke="rgba(251,247,241,0.22)" strokeWidth="0.8" />
+
+      {/* gövde: omuzlu cam form */}
+      <path
+        d={`M ${s.x} ${gTop + s.omuz + s.rx}
+            Q ${s.x} ${gTop + s.omuz} ${s.x + s.rx} ${gTop + s.omuz}
+            L ${50 - s.boyun / 2} ${gTop + s.omuz} L ${50 - s.boyun / 2} ${gTop}
+            L ${50 + s.boyun / 2} ${gTop} L ${50 + s.boyun / 2} ${gTop + s.omuz}
+            L ${s.x + s.w - s.rx} ${gTop + s.omuz}
+            Q ${s.x + s.w} ${gTop + s.omuz} ${s.x + s.w} ${gTop + s.omuz + s.rx}
+            L ${s.x + s.w} ${gTop + gH - s.rx}
+            Q ${s.x + s.w} ${gTop + gH} ${s.x + s.w - s.rx} ${gTop + gH}
+            L ${s.x + s.rx} ${gTop + gH}
+            Q ${s.x} ${gTop + gH} ${s.x} ${gTop + gH - s.rx} Z`}
+        fill={koyu ? "rgba(12,4,10,0.72)" : "rgba(251,247,241,0.07)"}
+        stroke="rgba(251,247,241,0.3)"
+        strokeWidth="1.2"
       />
-      {/* cam parlaması */}
-      <rect x={s.x + 6} y="36" width="7" height="78" rx="3.5" fill="rgba(255,255,255,0.28)" />
+
+      {/* sıvı + menisküs */}
+      <rect
+        x={s.x + 2.5}
+        y={dolumY}
+        width={s.w - 5}
+        height={gTop + gH - dolumY - 2.5}
+        rx={Math.max(3, s.rx - 3)}
+        fill={`url(#${gid})`}
+        opacity={koyu ? 0.85 : 1}
+      />
+      <ellipse cx="50" cy={dolumY} rx={(s.w - 5) / 2} ry="2.2" fill={renk1} opacity="0.55" />
+
+      {/* cam katmanı ve parlamalar */}
+      <rect x={s.x} y={gTop + s.omuz} width={s.w} height={gH - s.omuz} rx={s.rx} fill={`url(#${gid}g)`} />
+      <rect x={s.x + 5} y={gTop + s.omuz + 6} width="5.5" height={gH - s.omuz - 18} rx="2.7" fill="rgba(255,255,255,0.35)" />
+      <rect x={s.x + 12} y={gTop + s.omuz + 10} width="2" height={gH - s.omuz - 30} rx="1" fill="rgba(255,255,255,0.18)" />
+
       {/* marka etiketi */}
-      <rect x={50 - 16} y="66" width="32" height="24" rx="3" fill="rgba(18,5,16,0.55)" stroke="rgba(251,247,241,0.3)" strokeWidth="0.8" />
-      <text x="50" y="82" textAnchor="middle" fontSize="11" fontFamily="Georgia, serif" fill="#fbf7f1" letterSpacing="1">
+      <rect x="33" y="68" width="34" height="26" rx="2.5" fill={koyu ? "rgba(251,247,241,0.92)" : "rgba(18,5,16,0.6)"} stroke="rgba(251,247,241,0.35)" strokeWidth="0.7" />
+      <line x1="37" y1="73" x2="63" y2="73" stroke={koyu ? "rgba(18,5,16,0.4)" : "rgba(251,247,241,0.4)"} strokeWidth="0.6" />
+      <text x="50" y="86" textAnchor="middle" fontSize="10.5" fontFamily="Georgia, serif" fill={koyu ? "#1d0a19" : "#fbf7f1"} letterSpacing="1.2">
         {bas}
       </text>
+      <line x1="37" y1="90" x2="63" y2="90" stroke={koyu ? "rgba(18,5,16,0.4)" : "rgba(251,247,241,0.4)"} strokeWidth="0.6" />
     </svg>
   );
 }
@@ -282,11 +346,26 @@ export function DetayPanel({
   const favori = hesap?.favoriler.includes(parfum.id) ?? false;
   const benzerler = useMemo(() => bunaBenzer(parfum, KATALOG, 6), [parfum]);
   const topluluk = useMemo(() => toplulukVerisi(parfum), [parfum]);
+  const [karsiB, setKarsiB] = useState<Parfum | null>(null);
+  const [karsiSecimAcik, setKarsiSecimAcik] = useState(false);
   const aileler = Object.entries(parfum.aileler).sort(
     (a, b) => (b[1] as number) - (a[1] as number)
   );
   const sahneRenk = AILE_RENK[(aileler[0]?.[0] ?? "amber") as Aile];
   const maksNeZaman = Math.max(...topluluk.neZaman.map((z) => z.oran), 0.001);
+
+  // Karşılaştırma görünümü açıksa panelin içeriği tamamen ona döner
+  if (karsiB) {
+    return (
+      <div className="ortuKap" role="dialog" aria-modal>
+        <div className="ortu" onClick={onKapat} />
+        <div className="detayPanel">
+          <button className="kapat" onClick={onKapat} aria-label="Kapat">✕</button>
+          <KarsilastirmaGorunum a={parfum} b={karsiB} onGeri={() => setKarsiB(null)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="ortuKap" role="dialog" aria-modal>
@@ -381,7 +460,14 @@ export function DetayPanel({
           <button className="btn btnCizgi" onClick={() => favoriToggle(parfum.id)}>
             {favori ? "❤️ Favoride" : "🤍 Favorile"}
           </button>
+          <button className="btn btnCizgi" onClick={() => setKarsiSecimAcik((a) => !a)}>
+            ⚖️ Karşılaştır
+          </button>
         </div>
+
+        {karsiSecimAcik && (
+          <KarsiSecici mevcutId={parfum.id} onSec={(p) => { setKarsiB(p); setKarsiSecimAcik(false); }} />
+        )}
 
         <div className="piramitBolum" style={{ marginTop: 30 }}>
           <h4>Buna Benzer</h4>
@@ -395,6 +481,103 @@ export function DetayPanel({
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Karşılaştırılacak ikinci parfümü seçtiren mini arama
+function KarsiSecici({ mevcutId, onSec }: { mevcutId: string; onSec: (p: Parfum) => void }) {
+  const [sorgu, setSorgu] = useState("");
+  const sonuclar = useMemo(() => {
+    const s = sorgu.trim().toLocaleLowerCase("tr");
+    if (!s) return [];
+    return KATALOG.filter(
+      (p) =>
+        p.id !== mevcutId &&
+        (p.ad.toLocaleLowerCase("tr").includes(s) || p.marka.toLocaleLowerCase("tr").includes(s))
+    ).slice(0, 5);
+  }, [sorgu, mevcutId]);
+
+  return (
+    <div className="karsiSecici">
+      <input
+        className="girdi"
+        autoFocus
+        placeholder="Neyle karşılaştıralım? Parfüm veya marka yaz…"
+        value={sorgu}
+        onChange={(e) => setSorgu(e.target.value)}
+      />
+      {sonuclar.map((p) => (
+        <button key={p.id} className="karsiSonuc" onClick={() => onSec(p)}>
+          <span className="pMarka">{p.marka}</span> {p.ad}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ⚖️ Yan yana karşılaştırma: ortak/farklı notalar, ölçüler, mevsimler
+export function KarsilastirmaGorunum({ a, b, onGeri }: { a: Parfum; b: Parfum; onGeri: () => void }) {
+  const ta = toplulukVerisi(a);
+  const tb = toplulukVerisi(b);
+  const notalarA = new Set([...a.notalar.tepe, ...a.notalar.kalp, ...a.notalar.dip]);
+  const notalarB = new Set([...b.notalar.tepe, ...b.notalar.kalp, ...b.notalar.dip]);
+  const ortak = [...notalarA].filter((n) => notalarB.has(n));
+  const sadeceA = [...notalarA].filter((n) => !notalarB.has(n));
+  const sadeceB = [...notalarB].filter((n) => !notalarA.has(n));
+
+  const Sutun = ({ p, t }: { p: Parfum; t: ReturnType<typeof toplulukVerisi> }) => (
+    <div className="karsiSutun">
+      <div className="karsiSise"><SiseGorsel parfum={p} /></div>
+      <div className="pMarka">{p.marka}</div>
+      <div className="serif" style={{ fontSize: 20, lineHeight: 1.15 }}>{p.ad}</div>
+      <div className="pMeta" style={{ justifyContent: "center" }}>
+        <span className="yildiz">★ {t.puan.toFixed(1)}</span>
+        <span>· {p.yil}</span>
+      </div>
+    </div>
+  );
+
+  const OlcuKiyas = ({ ad, va, vb }: { ad: string; va: number; vb: number }) => (
+    <div className="kiyasSatir">
+      <div className="kiyasYol sol"><div className="kiyasDolgu" style={{ width: `${Math.round(va * 100)}%` }} /></div>
+      <span className="kiyasAd">{ad}</span>
+      <div className="kiyasYol"><div className="kiyasDolgu" style={{ width: `${Math.round(vb * 100)}%` }} /></div>
+    </div>
+  );
+
+  return (
+    <div>
+      <button className="atlaBtn" onClick={onGeri}>← Detaya dön</button>
+      <div className="karsiBaslik">
+        <Sutun p={a} t={ta} />
+        <div className="karsiVs serif">vs</div>
+        <Sutun p={b} t={tb} />
+      </div>
+
+      <div className="kiyasKume">
+        <OlcuKiyas ad="Yoğunluk" va={a.yogunluk} vb={b.yogunluk} />
+        <OlcuKiyas ad="Kalıcılık" va={a.kalicilik} vb={b.kalicilik} />
+        <OlcuKiyas ad="Popülerlik" va={a.populerlik} vb={b.populerlik} />
+        <OlcuKiyas ad="Kış" va={a.mevsim.kis} vb={b.mevsim.kis} />
+        <OlcuKiyas ad="Yaz" va={a.mevsim.yaz} vb={b.mevsim.yaz} />
+        <OlcuKiyas ad="Gece" va={a.ortam.gece ?? 0} vb={b.ortam.gece ?? 0} />
+      </div>
+
+      {ortak.length > 0 && (
+        <div className="piramitBolum">
+          <h4>🤝 Ortak Notalar</h4>
+          <div className="piramit">{ortak.map((n) => <NotaRozet key={n} id={n} />)}</div>
+        </div>
+      )}
+      <div className="piramitBolum">
+        <h4>Sadece {a.ad}</h4>
+        <div className="piramit">{sadeceA.map((n) => <NotaRozet key={n} id={n} />)}</div>
+      </div>
+      <div className="piramitBolum">
+        <h4>Sadece {b.ad}</h4>
+        <div className="piramit">{sadeceB.map((n) => <NotaRozet key={n} id={n} />)}</div>
       </div>
     </div>
   );

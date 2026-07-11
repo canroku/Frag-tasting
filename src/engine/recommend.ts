@@ -219,3 +219,21 @@ export function bunaBenzer(kaynak: Parfum, katalog: Parfum[], n = 6): Parfum[] {
     .slice(0, n)
     .map((x) => x.p);
 }
+
+const FIYAT_DEGER = { ekonomik: 0, orta: 1, luks: 2 } as const;
+
+// Muadil bulucu: kaynak parfüme koku olarak yakın AMA daha uygun fiyatlı
+// alternatifler. Parfüm topluluğunun en sevdiği "dupe" özelliği.
+export function muadilBul(kaynak: Parfum, katalog: Parfum[], n = 5): { parfum: Parfum; benzerlik: number }[] {
+  const kaynakFiyat = FIYAT_DEGER[kaynak.fiyat_seviyesi];
+  return katalog
+    .filter(
+      (p) =>
+        p.id !== kaynak.id &&
+        FIYAT_DEGER[p.fiyat_seviyesi] < kaynakFiyat // daha ucuz kademe
+    )
+    .map((p) => ({ parfum: p, benzerlik: parfumBenzerlik(kaynak, p) }))
+    .filter((x) => x.benzerlik >= 0.45) // gerçekten benzer olanlar
+    .sort((a, b) => b.benzerlik - a.benzerlik)
+    .slice(0, n);
+}

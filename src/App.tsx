@@ -49,9 +49,14 @@ export default function App() {
       {girisliVeAnketli && (
         <header className="ustCubuk">
           <div className="ustCubukIc">
-            <span className="logo">
+            <button
+              className="logo logoBtn"
+              onClick={() => sekmeyeGec("onerilerim")}
+              title="Ana ekran — Senin Seçkin"
+              aria-label="Ana ekrana dön"
+            >
               Frag <em>Tasting</em>
-            </span>
+            </button>
             <nav className="sekmeler">
               <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>

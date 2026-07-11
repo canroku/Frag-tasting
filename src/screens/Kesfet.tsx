@@ -1,7 +1,7 @@
 // Bölüm 7 — Arama & Keşif: serbest metin, filtreler, sıralama, "buna benzer"
 import { useEffect, useMemo, useState } from "react";
 import { KATALOG } from "../data/catalog";
-import { ara, BOS_FILTRE, type AramaFiltre } from "../engine/search";
+import { ara, BOS_FILTRE, markaListesi, type AramaFiltre } from "../engine/search";
 import { AILELER, AILE_ETIKET } from "../engine/types";
 import type { Aile, Cinsiyet, Fiyat, Mevsim, Ortam } from "../engine/types";
 import { NOTALAR } from "../data/notes";
@@ -28,6 +28,20 @@ export function Kesfet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [filtre, hesap?.profil, katalogSurum]
   );
+
+  // Marka listesi (en çok parfümü olandan aza) — arama kutusuyla süzülür
+  const markalar = useMemo(() => markaListesi(KATALOG), [katalogSurum]);
+  const [markaSorgu, setMarkaSorgu] = useState("");
+  const markaSonuc = useMemo(() => {
+    const s = markaSorgu.trim().toLocaleLowerCase("tr");
+    return (s ? markalar.filter((m) => m.marka.toLocaleLowerCase("tr").includes(s)) : markalar).slice(0, 40);
+  }, [markalar, markaSorgu]);
+
+  // 🎲 Şaşırt Beni — mevcut filtreye uyan rastgele bir parfümü aç
+  function sasirtBeni() {
+    if (sonuclar.length === 0) return;
+    detay.ac(sonuclar[Math.floor(Math.random() * sonuclar.length)]);
+  }
 
   // filtre değişince sayfalamayı başa sar
   useEffect(() => setLimit(48), [filtre]);
@@ -67,6 +81,9 @@ export function Kesfet() {
             onChange={(e) => setMetinHam(e.target.value)}
           />
         </div>
+        <button className="btn btnCizgi" onClick={sasirtBeni} title="Filtreye uyan rastgele bir parfüm aç">
+          🎲 Şaşırt Beni
+        </button>
       </div>
 
       <div className="aramaSatir">
@@ -78,6 +95,22 @@ export function Kesfet() {
           <option value="">Nota</option>
           {NOTALAR.map((n) => <option key={n.id} value={n.id}>{n.ad}</option>)}
         </select>
+        <input
+          className={`filtreSecici markaGirdi ${filtre.marka ? "dolu" : ""}`}
+          list="markaListesi"
+          placeholder={`Marka (${markalar.length})`}
+          value={filtre.marka ?? markaSorgu}
+          onChange={(e) => {
+            const v = e.target.value;
+            setMarkaSorgu(v);
+            g({ marka: markalar.some((m) => m.marka === v) ? v : undefined });
+          }}
+        />
+        <datalist id="markaListesi">
+          {markaSonuc.map((m) => (
+            <option key={m.marka} value={m.marka}>{m.adet} parfüm</option>
+          ))}
+        </datalist>
         <select className={`filtreSecici ${filtre.mevsim ? "dolu" : ""}`} value={filtre.mevsim ?? ""} onChange={(e) => g({ mevsim: (e.target.value || undefined) as Mevsim | undefined })}>
           <option value="">Mevsim</option>
           <option value="ilkbahar">İlkbahar</option>
@@ -116,8 +149,8 @@ export function Kesfet() {
           <option value="yenilik">Yeniliğe göre</option>
           <option value="fiyat">Fiyata göre</option>
         </select>
-        {(filtre.aile || filtre.nota || filtre.mevsim || filtre.ortam || filtre.cinsiyet || filtre.butce || filtre.nis || filtre.metin) && (
-          <button className="btn btnCizgi btnKucuk" onClick={() => { setFiltre(BOS_FILTRE); setMetinHam(""); }}>Temizle ✕</button>
+        {(filtre.aile || filtre.nota || filtre.marka || filtre.mevsim || filtre.ortam || filtre.cinsiyet || filtre.butce || filtre.nis || filtre.metin) && (
+          <button className="btn btnCizgi btnKucuk" onClick={() => { setFiltre(BOS_FILTRE); setMetinHam(""); setMarkaSorgu(""); }}>Temizle ✕</button>
         )}
       </div>
 

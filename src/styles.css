@@ -144,8 +144,11 @@ h1, h2, h3, .serif {
   padding: 14px clamp(18px, 4vw, 40px);
   display: flex; align-items: center; gap: 20px;
 }
-.logo { font-family: var(--font-serif); font-size: 21px; letter-spacing: 0.02em; }
+.logo { font-family: var(--font-serif); font-size: 21px; letter-spacing: 0.02em; color: var(--cream); }
 .logo em { font-style: italic; color: var(--accent); }
+.logoBtn { transition: opacity 180ms var(--ease), transform 180ms var(--ease); }
+.logoBtn:hover { opacity: 0.82; transform: translateY(-1px); }
+.logoBtn:active { transform: translateY(0); }
 
 .sekmeler { display: flex; gap: 4px; margin-left: auto; }
 .sekme {
@@ -438,17 +441,18 @@ h1, h2, h3, .serif {
 
 /* ---------- Detay katmanı ---------- */
 .ortuKap {
-  position: fixed; inset: 0; z-index: 90;
+  position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: flex-end; justify-content: center;
 }
-@media (min-width: 720px) { .ortuKap { align-items: center; } }
+@media (min-width: 720px) { .ortuKap { align-items: center; padding: 24px; } }
 .ortu { position: absolute; inset: 0; background: rgba(10, 2, 9, 0.72); backdrop-filter: blur(6px); animation: belir 250ms ease both; }
 @keyframes belir { from { opacity: 0; } }
 .detayPanel {
   position: relative;
   width: min(660px, 100%);
-  max-height: min(88dvh, 820px);
+  max-height: 90dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: linear-gradient(180deg, var(--bg-2), var(--bg));
   border: 1px solid var(--hairline);
   border-radius: 26px 26px 0 0;
@@ -456,7 +460,10 @@ h1, h2, h3, .serif {
   animation: panelGel 380ms var(--ease) both;
   box-shadow: var(--shadow);
 }
-@media (min-width: 720px) { .detayPanel { border-radius: 26px; } }
+@media (min-width: 720px) {
+  .detayPanel { border-radius: 26px; max-height: min(88dvh, 860px); }
+  .detayGenis { width: min(760px, 100%); }
+}
 @keyframes panelGel { from { transform: translateY(48px); opacity: 0; } }
 .kapat {
   position: absolute; top: 18px; right: 18px;
@@ -623,6 +630,24 @@ h1, h2, h3, .serif {
 
 .benzerSise { display: flex; justify-content: center; margin-bottom: 8px; }
 .benzerSise .sise { height: 64px; }
+
+/* ---------- Muadil Bul ---------- */
+.muadilListe { display: flex; flex-direction: column; gap: 10px; }
+.muadilKart {
+  display: flex; gap: 14px; align-items: center; width: 100%;
+  padding: 12px 14px; text-align: left;
+  border: 1px solid var(--hairline); border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: all 200ms var(--ease);
+}
+.muadilKart:hover { border-color: var(--accent); background: var(--accent-soft); transform: translateX(3px); }
+.muadilKart .benzerSise { margin-bottom: 0; }
+.muadilKart .benzerSise .sise { height: 54px; }
+.muadilYuzde { color: var(--green); font-weight: 600; }
+
+/* ---------- Marka filtresi (datalist input) ---------- */
+.markaGirdi { min-width: 150px; }
+.markaGirdi::placeholder { color: var(--cream-60); }
 
 /* ---------- Gerçek fotoğraf desteği ---------- */
 .siseFoto { object-fit: contain; border-radius: 10px; }

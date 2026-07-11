@@ -1,9 +1,10 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { Parfum, Oneri, Aile, Cinsiyet } from "../engine/types";
 import { AILE_ETIKET, AILE_RENK, fragranticaLink } from "../engine/types";
 import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
 import { KATALOG } from "../data/catalog";
-import { bunaBenzer } from "../engine/recommend";
+import { bunaBenzer, muadilBul } from "../engine/recommend";
 import { toplulukVerisi, oyFormat } from "../engine/topluluk";
 import { useStore } from "../state/store";
 import { useKatalogSurumu } from "../state/useKatalog";
@@ -193,6 +194,41 @@ export function SiseGorsel({ parfum, buyuk = false }: { parfum: Parfum; buyuk?: 
   );
 }
 
+// Modal katmanı — createPortal ile doğrudan body'ye takılır. Böylece
+// animasyonlu kartların transform'u fixed konumlandırmayı bozamaz ve panel
+// her zaman viewport'a göre ortalanır. ESC ile kapanır, arka plan kilitlenir.
+export function Modal({
+  onKapat,
+  children,
+  genis = false,
+}: {
+  onKapat: () => void;
+  children: ReactNode;
+  genis?: boolean;
+}) {
+  useEffect(() => {
+    const oncekiTasma = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && onKapat();
+    window.addEventListener("keydown", esc);
+    return () => {
+      document.body.style.overflow = oncekiTasma;
+      window.removeEventListener("keydown", esc);
+    };
+  }, [onKapat]);
+
+  return createPortal(
+    <div className="ortuKap" role="dialog" aria-modal>
+      <div className="ortu" onClick={onKapat} />
+      <div className={`detayPanel ${genis ? "detayGenis" : ""}`}>
+        <button className="kapat" onClick={onKapat} aria-label="Kapat">✕</button>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export function NotaRozet({ id }: { id: string }) {
   const nota = NOTA_MAP[id];
   const renk = nota ? KATEGORI_RENK[nota.kategori] : "#999";
@@ -348,6 +384,8 @@ export function DetayPanel({
   const katalogSurum = useKatalogSurumu();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const benzerler = useMemo(() => bunaBenzer(parfum, KATALOG, 6), [parfum, katalogSurum]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const muadiller = useMemo(() => muadilBul(parfum, KATALOG, 4), [parfum, katalogSurum]);
   const topluluk = useMemo(() => toplulukVerisi(parfum), [parfum]);
   const [karsiB, setKarsiB] = useState<Parfum | null>(null);
   const [karsiSecimAcik, setKarsiSecimAcik] = useState(false);
@@ -360,22 +398,14 @@ export function DetayPanel({
   // Karşılaştırma görünümü açıksa panelin içeriği tamamen ona döner
   if (karsiB) {
     return (
-      <div className="ortuKap" role="dialog" aria-modal>
-        <div className="ortu" onClick={onKapat} />
-        <div className="detayPanel">
-          <button className="kapat" onClick={onKapat} aria-label="Kapat">✕</button>
-          <KarsilastirmaGorunum a={parfum} b={karsiB} onGeri={() => setKarsiB(null)} />
-        </div>
-      </div>
+      <Modal onKapat={onKapat}>
+        <KarsilastirmaGorunum a={parfum} b={karsiB} onGeri={() => setKarsiB(null)} />
+      </Modal>
     );
   }
 
   return (
-    <div className="ortuKap" role="dialog" aria-modal>
-      <div className="ortu" onClick={onKapat} />
-      <div className="detayPanel">
-        <button className="kapat" onClick={onKapat} aria-label="Kapat">✕</button>
-
+    <Modal onKapat={onKapat}>
         <div className="detayVitrin" style={{ ["--sahne" as string]: sahneRenk }}>
           <SiseGorsel parfum={parfum} buyuk />
           <div className="detayBaslik">
@@ -472,6 +502,32 @@ export function DetayPanel({
           <KarsiSecici mevcutId={parfum.id} onSec={(p) => { setKarsiB(p); setKarsiSecimAcik(false); }} />
         )}
 
+        {/* 💸 Muadil Bul — daha uygun fiyatlı, koku olarak yakın alternatifler */}
+        {muadiller.length > 0 && (
+          <div className="piramitBolum" style={{ marginTop: 30 }}>
+            <h4>💸 Daha Uygun Muadiller</h4>
+            <p className="minik" style={{ marginBottom: 10 }}>
+              Benzer koku profili, daha dost fiyat — kokusunu sevdiysen bunları da dene.
+            </p>
+            <div className="muadilListe">
+              {muadiller.map(({ parfum: m, benzerlik }) => (
+                <button key={m.id} className="muadilKart" onClick={() => onBenzerSec(m)}>
+                  <div className="benzerSise"><SiseGorsel parfum={m} /></div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="pMarka">{m.marka}</div>
+                    <div className="serif" style={{ fontSize: 16 }}>{m.ad}</div>
+                    <div className="pMeta">
+                      <span>{FIYAT_AD[m.fiyat_seviyesi]}</span>
+                      <span>·</span>
+                      <span className="muadilYuzde">%{Math.round(benzerlik * 100)} benzer</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="piramitBolum" style={{ marginTop: 30 }}>
           <h4>Buna Benzer</h4>
           <div className="benzerSira">
@@ -484,8 +540,7 @@ export function DetayPanel({
             ))}
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

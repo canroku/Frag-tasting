@@ -5,7 +5,7 @@ import { KATALOG } from "../data/catalog";
 import { oneriUret, sertFiltre } from "../engine/recommend";
 import type { Oneri, Parfum, ProfilVektoru } from "../engine/types";
 import { useStore } from "../state/store";
-import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum, SiseGorsel, SkorHalka } from "../components/ui";
+import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum, SiseGorsel, SkorHalka, Modal } from "../components/ui";
 import { AILE_RENK, AILE_ETIKET, AILELER, type Aile } from "../engine/types";
 import { clamp01 } from "../engine/vector";
 import { useKatalogSurumu } from "../state/useKatalog";
@@ -179,47 +179,43 @@ function KokuDuellosu({ profil, onKapat }: { profil: ProfilVektoru; onKapat: () 
   }
 
   return (
-    <div className="ortuKap" role="dialog" aria-modal>
-      <div className="ortu" onClick={onKapat} />
-      <div className="detayPanel duelloPanel">
-        <button className="kapat" onClick={onKapat} aria-label="Kapat">✕</button>
-        {bitti || !cift ? (
-          <div className="duelloBitti">
-            <div style={{ fontSize: 52 }}>✨</div>
-            <h3 className="serif">Zevkin kaydedildi</h3>
-            <p className="minik">
-              {ciftler.length} tur boyunca verdiğin kararlar profil vektörüne işlendi —
-              seçkin arka planda yeniden puanlandı.
-            </p>
-            <button className="btn btnAna" onClick={onKapat}>Seçkime dön</button>
+    <Modal onKapat={onKapat}>
+      {bitti || !cift ? (
+        <div className="duelloBitti">
+          <div style={{ fontSize: 52 }}>✨</div>
+          <h3 className="serif">Zevkin kaydedildi</h3>
+          <p className="minik">
+            {ciftler.length} tur boyunca verdiğin kararlar profil vektörüne işlendi —
+            seçkin arka planda yeniden puanlandı.
+          </p>
+          <button className="btn btnAna" onClick={onKapat}>Seçkime dön</button>
+        </div>
+      ) : (
+        <>
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
+            <span className="ustBaslik">⚔️ Koku Düellosu · {tur + 1} / {ciftler.length}</span>
+            <h3 className="serif" style={{ fontSize: 26, marginTop: 8 }}>Hangisi daha çok sen?</h3>
           </div>
-        ) : (
-          <>
-            <div style={{ textAlign: "center", marginBottom: 18 }}>
-              <span className="ustBaslik">⚔️ Koku Düellosu · {tur + 1} / {ciftler.length}</span>
-              <h3 className="serif" style={{ fontSize: 26, marginTop: 8 }}>Hangisi daha çok sen?</h3>
-            </div>
-            <div className="duelloAlan">
-              {[cift[0], cift[1]].map((p, i) => (
-                <button key={p.id} className="duelloKart" onClick={() => sec(p)}>
-                  <SiseGorsel parfum={p} />
-                  <div className="pMarka">{p.marka}</div>
-                  <div className="serif" style={{ fontSize: 19, lineHeight: 1.15 }}>{p.ad}</div>
-                  <div className="etiketSira" style={{ justifyContent: "center", marginTop: 8 }}>
-                    {Object.entries(p.aileler).sort((x, y) => (y[1] as number) - (x[1] as number)).slice(0, 2).map(([a]) => (
-                      <span key={a} className="etiket">{AILE_ETIKET[a as Aile]}</span>
-                    ))}
-                  </div>
-                  {i === 0 && <span className="duelloTus">← sol</span>}
-                  {i === 1 && <span className="duelloTus">sağ →</span>}
-                </button>
-              ))}
-              <div className="karsiVs serif duelloVs">vs</div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+          <div className="duelloAlan">
+            {[cift[0], cift[1]].map((p, i) => (
+              <button key={p.id} className="duelloKart" onClick={() => sec(p)}>
+                <SiseGorsel parfum={p} />
+                <div className="pMarka">{p.marka}</div>
+                <div className="serif" style={{ fontSize: 19, lineHeight: 1.15 }}>{p.ad}</div>
+                <div className="etiketSira" style={{ justifyContent: "center", marginTop: 8 }}>
+                  {Object.entries(p.aileler).sort((x, y) => (y[1] as number) - (x[1] as number)).slice(0, 2).map(([a]) => (
+                    <span key={a} className="etiket">{AILE_ETIKET[a as Aile]}</span>
+                  ))}
+                </div>
+                {i === 0 && <span className="duelloTus">← sol</span>}
+                {i === 1 && <span className="duelloTus">sağ →</span>}
+              </button>
+            ))}
+            <div className="karsiVs serif duelloVs">vs</div>
+          </div>
+        </>
+      )}
+    </Modal>
   );
 }
 

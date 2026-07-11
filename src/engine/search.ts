@@ -8,12 +8,22 @@ export interface AramaFiltre {
   metin: string;
   aile?: Aile;
   nota?: string;
+  marka?: string;
   mevsim?: Mevsim;
   ortam?: Ortam;
   cinsiyet?: Cinsiyet;
   butce?: Fiyat;
   nis?: "nis" | "designer";
   siralama: "uygunluk" | "populerlik" | "yenilik" | "fiyat";
+}
+
+// Katalogdaki markaları parfüm sayısıyla, çoktan aza sıralı döndürür
+export function markaListesi(katalog: Parfum[]): { marka: string; adet: number }[] {
+  const sayim = new Map<string, number>();
+  for (const p of katalog) sayim.set(p.marka, (sayim.get(p.marka) ?? 0) + 1);
+  return [...sayim.entries()]
+    .map(([marka, adet]) => ({ marka, adet }))
+    .sort((a, b) => b.adet - a.adet || a.marka.localeCompare(b.marka, "tr"));
 }
 
 export const BOS_FILTRE: AramaFiltre = { metin: "", siralama: "uygunluk" };
@@ -104,6 +114,7 @@ export function ara(
     }
     if (f.mevsim && p.mevsim[f.mevsim] < 0.6) return false;
     if (f.ortam && (p.ortam[f.ortam] ?? 0) < 0.6) return false;
+    if (f.marka && p.marka !== f.marka) return false;
     if (f.cinsiyet && p.cinsiyet !== f.cinsiyet && p.cinsiyet !== "unisex") return false;
     if (f.butce && p.fiyat_seviyesi !== f.butce) return false;
     if (f.nis === "nis" && !p.nis_mi) return false;

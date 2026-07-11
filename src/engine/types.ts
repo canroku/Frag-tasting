@@ -79,6 +79,10 @@ export interface Parfum {
   // yerine bu görsel gösterilir. Telifli görseller katalogda tutulmaz;
   // alan, kendi lisanslı görsellerinizi bağlamanız içindir.
   gorsel_url?: string;
+  // Gerçek topluluk verisi (açık veri setinden). Varsa detay panelindeki
+  // puan/oy blokları sentetik değil bu değerlerle beslenir.
+  topluluk_puan?: number; // 5 üzerinden
+  topluluk_oy?: number;
 }
 
 // Anket cevapları (Bölüm 4)

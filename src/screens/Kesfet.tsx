@@ -12,11 +12,16 @@ export function Kesfet() {
   const { hesap, aramaKaydet } = useStore();
   const detay = useDetay();
   const [filtre, setFiltre] = useState<AramaFiltre>(BOS_FILTRE);
+  const [limit, setLimit] = useState(48);
 
   const sonuclar = useMemo(
     () => ara(KATALOG, filtre, hesap?.profil ?? null),
     [filtre, hesap?.profil]
   );
+
+  // filtre değişince sayfalamayı başa sar
+  useEffect(() => setLimit(48), [filtre]);
+  const gorunen = sonuclar.slice(0, limit);
 
   // arama geçmişi: yazma durunca kaydet (Bölüm 8)
   useEffect(() => {
@@ -106,11 +111,20 @@ export function Kesfet() {
       {sonuclar.length === 0 ? (
         <BosDurum ikon="🫙" baslik="Bu filtrelerle sonuç yok" alt="Filtreleri gevşetmeyi dene." />
       ) : (
-        <div className="kartIzgara" style={{ marginTop: 20 }}>
-          {sonuclar.map((p, i) => (
-            <ParfumKart key={p.id} parfum={p} sira={Math.min(i, 8)} onDetay={detay.ac} />
-          ))}
-        </div>
+        <>
+          <div className="kartIzgara" style={{ marginTop: 20 }}>
+            {gorunen.map((p, i) => (
+              <ParfumKart key={p.id} parfum={p} sira={Math.min(i % 48, 8)} onDetay={detay.ac} />
+            ))}
+          </div>
+          {sonuclar.length > limit && (
+            <div style={{ textAlign: "center", marginTop: 28 }}>
+              <button className="btn btnCizgi" onClick={() => setLimit((l) => l + 48)}>
+                Daha fazla göster · kalan {(sonuclar.length - limit).toLocaleString("tr-TR")}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {detay.acik && (

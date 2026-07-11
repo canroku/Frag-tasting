@@ -22,14 +22,19 @@ export interface ToplulukVerisi {
 
 export function toplulukVerisi(p: Parfum): ToplulukVerisi {
   const gurultu = hash01(p.id) * 0.3 - 0.15;
-  const puan = Math.min(4.9, Math.max(3.2, 3.45 + p.populerlik * 1.35 + gurultu));
-  const oySayisi = Math.round(600 + hash01(p.id, 7) * 14000 * (0.3 + p.populerlik));
+  // Açık veri setinden gelen gerçek puan/oy varsa onu kullan
+  const puan =
+    p.topluluk_puan ??
+    Math.min(4.9, Math.max(3.2, 3.45 + p.populerlik * 1.35 + gurultu));
+  const oySayisi =
+    p.topluluk_oy ?? Math.round(600 + hash01(p.id, 7) * 14000 * (0.3 + p.populerlik));
 
-  // beğeni dağılımı: popülerlik yükseldikçe "bayıldım" ağır basar
-  const sev = 0.22 + p.populerlik * 0.33 + hash01(p.id, 1) * 0.06;
+  // beğeni dağılımı: topluluk puanı yükseldikçe "bayıldım" ağır basar
+  const kalite = Math.min(1, Math.max(0, (puan - 3.2) / 1.7));
+  const sev = 0.2 + kalite * 0.35 + hash01(p.id, 1) * 0.06;
   const begen = 0.28 + hash01(p.id, 2) * 0.08;
-  const idare = 0.16 - p.populerlik * 0.05 + hash01(p.id, 3) * 0.05;
-  const olmadi = 0.1 - p.populerlik * 0.04 + hash01(p.id, 4) * 0.04;
+  const idare = 0.17 - kalite * 0.06 + hash01(p.id, 3) * 0.05;
+  const olmadi = 0.11 - kalite * 0.05 + hash01(p.id, 4) * 0.04;
   const hic = 0.04 + hash01(p.id, 5) * 0.02;
   const toplam = sev + begen + idare + olmadi + hic;
 

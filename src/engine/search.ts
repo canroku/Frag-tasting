@@ -39,13 +39,13 @@ const ORTAM_KELIME: Record<string, string[]> = {
   spor: ["spor"],
 };
 
-function metinPuani(p: Parfum, sorgu: string): number {
-  if (!sorgu.trim()) return 1;
-  const kelimeler = kucult(sorgu)
-    .split(/\s+/)
-    .filter((k) => k && !DUR_KELIMELER.has(k));
-  if (kelimeler.length === 0) return 1;
+// Arama dizini: on binlerce kayıtta her tuş vuruşunda yeniden kurmamak
+// için parfüm başına bir kez oluşturulup önbelleklenir.
+const dizinOnbellek = new WeakMap<Parfum, string>();
 
+function aramaDizini(p: Parfum): string {
+  const hazir = dizinOnbellek.get(p);
+  if (hazir) return hazir;
   const parcalar = [
     kucult(p.ad),
     kucult(p.marka),
@@ -58,7 +58,19 @@ function metinPuani(p: Parfum, sorgu: string): number {
   for (const [o, sozler] of Object.entries(ORTAM_KELIME)) {
     if ((p.ortam[o as Ortam] ?? 0) >= 0.6) parcalar.push(...sozler);
   }
-  const hedef = parcalar.join(" ");
+  const dizin = parcalar.join(" ");
+  dizinOnbellek.set(p, dizin);
+  return dizin;
+}
+
+function metinPuani(p: Parfum, sorgu: string): number {
+  if (!sorgu.trim()) return 1;
+  const kelimeler = kucult(sorgu)
+    .split(/\s+/)
+    .filter((k) => k && !DUR_KELIMELER.has(k));
+  if (kelimeler.length === 0) return 1;
+
+  const hedef = aramaDizini(p);
 
   let puan = 0;
   for (const k of kelimeler) {

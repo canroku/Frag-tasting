@@ -12,7 +12,14 @@ export function Kesfet() {
   const { hesap, aramaKaydet } = useStore();
   const detay = useDetay();
   const [filtre, setFiltre] = useState<AramaFiltre>(BOS_FILTRE);
+  const [metinHam, setMetinHam] = useState("");
   const [limit, setLimit] = useState(48);
+
+  // 30 binlik katalogda her tuş vuruşunda arama yapmamak için kısa erteleme
+  useEffect(() => {
+    const z = setTimeout(() => setFiltre((f) => ({ ...f, metin: metinHam })), 250);
+    return () => clearTimeout(z);
+  }, [metinHam]);
 
   const sonuclar = useMemo(
     () => ara(KATALOG, filtre, hesap?.profil ?? null),
@@ -50,8 +57,8 @@ export function Kesfet() {
           <input
             className="girdi"
             placeholder="Parfüm, marka veya nota ara…"
-            value={filtre.metin}
-            onChange={(e) => g({ metin: e.target.value })}
+            value={metinHam}
+            onChange={(e) => setMetinHam(e.target.value)}
           />
         </div>
       </div>
@@ -104,7 +111,7 @@ export function Kesfet() {
           <option value="fiyat">Fiyata göre</option>
         </select>
         {(filtre.aile || filtre.nota || filtre.mevsim || filtre.ortam || filtre.cinsiyet || filtre.butce || filtre.nis || filtre.metin) && (
-          <button className="btn btnCizgi btnKucuk" onClick={() => setFiltre(BOS_FILTRE)}>Temizle ✕</button>
+          <button className="btn btnCizgi btnKucuk" onClick={() => { setFiltre(BOS_FILTRE); setMetinHam(""); }}>Temizle ✕</button>
         )}
       </div>
 

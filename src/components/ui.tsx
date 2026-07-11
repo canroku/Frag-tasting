@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { Parfum, Oneri, Aile, Cinsiyet } from "../engine/types";
-import { AILE_ETIKET, AILE_RENK } from "../engine/types";
+import { AILE_ETIKET, AILE_RENK, fragranticaLink } from "../engine/types";
 import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
 import { KATALOG } from "../data/catalog";
 import { bunaBenzer } from "../engine/recommend";
@@ -450,7 +450,7 @@ export function DetayPanel({
         <div className="detayAksiyon">
           <a
             className="btn btnAna"
-            href={parfum.fragrantica_url}
+            href={fragranticaLink(parfum)}
             target="_blank"
             rel="noreferrer"
             onClick={() => tiklamaKaydet(parfum.id)}

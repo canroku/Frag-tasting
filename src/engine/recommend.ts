@@ -52,7 +52,7 @@ function deneyimUyum(u: ProfilVektoru, p: Parfum): number {
     case "ilk_kez":
       return p.populerlik; // sevilen, giyilebilir kokular öne çıkar
     case "ara_sira":
-      return 0.7 * p.populerlik + 0.3 * yenilik;
+      return 0.8 * p.populerlik + 0.2 * yenilik;
     case "merakli":
       return 0.5 * p.populerlik + 0.5 * yenilik + (p.nis_mi ? 0.15 : 0);
     case "koleksiyoner":

@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 
 const kok = join(dirname(fileURLToPath(import.meta.url)), "..");
 const [, , csvYolu, minOyArg] = process.argv;
-const MIN_OY = parseInt(minOyArg) || 50;
+const MIN_OY = Number.isFinite(parseInt(minOyArg)) ? parseInt(minOyArg) : 50;
 if (!csvYolu) {
   console.error("Kullanım: node scripts/parfumo2katalog.mjs <csv> [minOy]");
   process.exit(1);
@@ -122,6 +122,17 @@ const NIS_MARKALAR = new Set(["amouage","xerjoff","roja parfums","roja dove","cl
 const EKONOMIK_MARKALAR = new Set(["avon","oriflame","yves rocher","zara","bath & body works","victoria's secret","lattafa","armaf","al haramain","al rehab","rasasi","swiss arabian","ajmal","afnan","maison alhambra","milton lloyd","adidas","axe","nivea","the body shop","c&a","h&m","primark","mercadona","lidl","dm","balea","catrice","essence","farmasi","eyfel","rebul","golden scent","la rive","jean marc","chatler","dorall collection","creation lamis","fragrance world","paris corner"]);
 
 // ---------- Mevcut katalogla tekilleştirme ----------
+// nota id → kategori (akorsuz kayıtlarda aile türetmek için)
+const notaKategori = {};
+for (const m of readFileSync(join(kok, "src", "data", "notes.ts"), "utf8").matchAll(
+  /\{ id: "([a-z_]+)", ad: "[^"]+", kategori: "([a-z]+)"/g
+)) notaKategori[m[1]] = m[2];
+const KATEGORI_AILE = {
+  narenciye: "narenciye", meyve: "gurme", cicek: "cicek", yesil: "yesil",
+  baharat: "amber", tatli: "gurme", odunsu: "odunsu", recine: "amber",
+  hayvansal: "deri", su: "aromatik",
+};
+
 const temelKaynak = readFileSync(join(kok, "src", "data", "catalog.ts"), "utf8");
 const mevcutlar = new Set(
   [...temelKaynak.matchAll(/ad: "([^"]+)", marka: "([^"]+)"/g)].map(
@@ -143,12 +154,18 @@ for (let s = 1; s < satirlar.length; s++) {
   const al = (ad) => (r[I[ad]] ?? "").trim();
   const oy = parseFloat(al("Rating_Count"));
   const puan = parseFloat(al("Rating_Value"));
+  const puanli = Number.isFinite(oy) && Number.isFinite(puan);
+  if (puanli && oy < MIN_OY) { atlanan.azOy++; continue; }
+  if (!puanli && MIN_OY > 0) { atlanan.eksik++; continue; }
   const akorHam = al("Main_Accords");
-  if (!Number.isFinite(oy) || !Number.isFinite(puan) || !akorHam || akorHam === "NA") { atlanan.eksik++; continue; }
-  if (oy < MIN_OY) { atlanan.azOy++; continue; }
 
   const ad = al("Name");
   const marka = al("Brand");
+  // parfüm olmayan ürünleri ele (saç spreyi, vücut losyonu, mum...)
+  if (/hair|body (lotion|spray|mist|cream|oil|wash)|shower|deodorant|roll-?on|after ?shave|room spray|candle|bougie|diffuser|soap|shampoo|talc/i.test(ad)) {
+    atlanan.urun = (atlanan.urun ?? 0) + 1;
+    continue;
+  }
   const anahtar = `${marka}|${ad}`.toLowerCase().replace(/[^a-z0-9|]+/g, "");
   if (mevcutlar.has(anahtar)) { atlanan.tekrar++; continue; }
   mevcutlar.add(anahtar);
@@ -167,7 +184,9 @@ for (let s = 1; s < satirlar.length; s++) {
   const tepe = katman("Top_Notes"), kalp = katman("Middle_Notes"), dip = katman("Base_Notes");
   if (tepe.length + kalp.length + dip.length < 2) { atlanan.notasiz++; continue; }
 
-  const akorlar = akorHam.split(",").map((a) => a.trim()).filter(Boolean);
+  const akorlar = (akorHam && akorHam !== "NA")
+    ? akorHam.split(",").map((a) => a.trim()).filter(Boolean)
+    : [];
   const aileler = {};
   const AGIRLIK = [0.85, 0.65, 0.5, 0.4, 0.3];
   akorlar.forEach((a, i) => {
@@ -175,7 +194,22 @@ for (let s = 1; s < satirlar.length; s++) {
       aileler[aile] = Math.max(aileler[aile] ?? 0, AGIRLIK[Math.min(i, 4)]);
     }
   });
-  if (Object.keys(aileler).length === 0) aileler.aromatik = 0.5;
+  if (Object.keys(aileler).length === 0) {
+    // akor yok → aileyi nota kategorilerinden türet (dip 3x, kalp 2x, tepe 1x)
+    const sayim = {};
+    const say = (ids, w) => {
+      for (const id of ids) {
+        const aile = KATEGORI_AILE[notaKategori[id]];
+        if (aile) sayim[aile] = (sayim[aile] ?? 0) + w;
+      }
+    };
+    say(tepe, 1); say(kalp, 2); say(dip, 3);
+    const enCok = Math.max(...Object.values(sayim), 1);
+    for (const [aile, adet] of Object.entries(sayim)) {
+      aileler[aile] = Math.round((0.3 + 0.5 * (adet / enCok)) * 100) / 100;
+    }
+    if (Object.keys(aileler).length === 0) aileler.aromatik = 0.5;
+  }
 
   // mevsim/ortam sezgileri
   let sicak = 0, ferah = 0;
@@ -184,6 +218,10 @@ for (let s = 1; s < satirlar.length; s++) {
     if (SICAK_AKOR.has(a)) sicak = Math.max(sicak, w);
     if (FERAH_AKOR.has(a)) ferah = Math.max(ferah, w);
   });
+  if (akorlar.length === 0) {
+    sicak = Math.max(aileler.amber ?? 0, aileler.gurme ?? 0, aileler.deri ?? 0) * 0.8;
+    ferah = Math.max(aileler.narenciye ?? 0, aileler.aromatik ?? 0, aileler.yesil ?? 0) * 0.8;
+  }
   const cicekli = aileler.cicek ?? 0;
   const c01 = (x) => Math.min(0.95, Math.max(0.05, Math.round(x * 100) / 100));
   const mevsim = {
@@ -223,33 +261,69 @@ for (let s = 1; s < satirlar.length; s++) {
 
   const yil = parseInt(al("Release_Year"));
 
-  kayitlar.push({
-    id: `pf_${String(kayitlar.length + 1).padStart(5, "0")}`,
+  // kompakt satır — katalog_ek.ts içindeki çözücü Parfum nesnesine açar
+  kayitlar.push([
     ad, marka,
-    yil: Number.isFinite(yil) ? yil : 2010,
-    cinsiyet, aileler,
-    notalar: { tepe, kalp, dip },
-    mevsim, ortam, yogunluk, kalicilik,
-    nis_mi: nis, fiyat_seviyesi: fiyat,
-    populerlik: c01(Math.log10(oy) / 4),
-    fragrantica_url: `https://www.fragrantica.com/search/?query=${encodeURIComponent(`${marka} ${ad}`)}`,
-    topluluk_puan: Math.round((puan / 2) * 10) / 10, // Parfumo 0-10 → 0-5
-    topluluk_oy: Math.round(oy),
-  });
+    Number.isFinite(yil) ? yil : 2010,
+    cinsiyet === "kadin" ? 1 : cinsiyet === "erkek" ? 2 : 0,
+    Object.entries(aileler).flat(),
+    tepe, kalp, dip,
+    [mevsim.kis, mevsim.ilkbahar, mevsim.yaz, mevsim.sonbahar],
+    [ortam.gunluk, ortam.is, ortam.gece, ortam.ozel, ortam.spor],
+    yogunluk, kalicilik,
+    nis ? 1 : 0,
+    fiyat === "ekonomik" ? 0 : fiyat === "luks" ? 2 : 1,
+    // hiç oylanmamış kayıtlar düşük popülerlik önseli alır — bilinmeyen
+    // kokular ancak koleksiyoner profillerinde (yenilik bonusu) öne çıkar
+    puanli ? c01(Math.log10(Math.max(oy, 2)) / 4) : 0.18,
+    puanli ? Math.round((puan / 2) * 10) / 10 : 0, // Parfumo 0-10 → 0-5; 0 = veri yok
+    puanli ? Math.round(oy) : 0,
+  ]);
 }
 
 // popülerliğe göre sırala ki ilk yüklemeler en bilinenleri göstersin
-kayitlar.sort((a, b) => (b.topluluk_oy ?? 0) - (a.topluluk_oy ?? 0));
+kayitlar.sort((a, b) => b[16] - a[16]);
 
-// JSON string olarak gömülür: 6 binlik dizi literalinin tip çıkarımı
-// TypeScript'i aşıyor; parse hem hızlı hem derleyici-dostu.
+// Kompakt satırlar JSON string olarak gömülür; çalışma anında Parfum'a açılır.
+// (Alan adlarını her kayıtta tekrarlamamak dosyayı ~%60 küçültür.)
 const cikti = `// Bu dosya scripts/parfumo2katalog.mjs tarafından üretilir — elle düzenleme.
 // Kaynak: TidyTuesday Parfumo veri seti (2024-12-10), minimum ${MIN_OY} oy.
-import type { Parfum } from "../engine/types";
+import type { Parfum, Aile, Cinsiyet, Fiyat } from "../engine/types";
 
 const veri = ${JSON.stringify(JSON.stringify(kayitlar))};
 
-export const KATALOG_EK: Parfum[] = JSON.parse(veri);
+type Satir = [
+  string, string, number, number, (string | number)[],
+  string[], string[], string[], number[], number[],
+  number, number, number, number, number, number, number
+];
+
+const CINSIYET: Cinsiyet[] = ["unisex", "kadin", "erkek"];
+const FIYAT: Fiyat[] = ["ekonomik", "orta", "luks"];
+
+export const KATALOG_EK: Parfum[] = (JSON.parse(veri) as Satir[]).map((s, i) => {
+  const aileler: Partial<Record<Aile, number>> = {};
+  for (let j = 0; j < s[4].length; j += 2) {
+    aileler[s[4][j] as Aile] = s[4][j + 1] as number;
+  }
+  return {
+    id: \`pf_\${i + 1}\`,
+    ad: s[0],
+    marka: s[1],
+    yil: s[2],
+    cinsiyet: CINSIYET[s[3]],
+    aileler,
+    notalar: { tepe: s[5], kalp: s[6], dip: s[7] },
+    mevsim: { kis: s[8][0], ilkbahar: s[8][1], yaz: s[8][2], sonbahar: s[8][3] },
+    ortam: { gunluk: s[9][0], is: s[9][1], gece: s[9][2], ozel: s[9][3], spor: s[9][4] },
+    yogunluk: s[10],
+    kalicilik: s[11],
+    nis_mi: s[12] === 1,
+    fiyat_seviyesi: FIYAT[s[13]],
+    populerlik: s[14],
+    ...(s[16] > 0 ? { topluluk_puan: s[15], topluluk_oy: s[16] } : {}),
+  };
+});
 `;
 writeFileSync(join(kok, "src", "data", "katalog_ek.ts"), cikti);
 console.log(`✔ ${kayitlar.length} parfüm dönüştürüldü → src/data/katalog_ek.ts`);

@@ -74,7 +74,8 @@ export interface Parfum {
   nis_mi: boolean;
   fiyat_seviyesi: Fiyat;
   populerlik: number; // crowd-pleaser sinyali
-  fragrantica_url: string;
+  // Yoksa çalışma anında marka+ad ile arama linki üretilir (fragranticaLink)
+  fragrantica_url?: string;
   // Lisanslı gerçek ürün fotoğrafı (opsiyonel). Ayarlanırsa illüstrasyon
   // yerine bu görsel gösterilir. Telifli görseller katalogda tutulmaz;
   // alan, kendi lisanslı görsellerinizi bağlamanız içindir.
@@ -123,4 +124,13 @@ export interface Oneri {
   parfum: Parfum;
   skor: number; // 0-1 normalize uyum puanı
   neden: string[]; // "neden önerildi" rozetleri
+}
+
+// Fragrantica yalnızca yönlendirme hedefi (Bölüm 9) — kayıtta url yoksa
+// marka+ad ile arama linki üretilir, böylece binlerce kayıtta url saklanmaz.
+export function fragranticaLink(p: Parfum): string {
+  return (
+    p.fragrantica_url ??
+    `https://www.fragrantica.com/search/?query=${encodeURIComponent(`${p.marka} ${p.ad}`)}`
+  );
 }

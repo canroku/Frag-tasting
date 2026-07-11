@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "./state/store";
 import { Aurora } from "./components/ui";
 import { sayfaGecisi } from "./components/gecis";
+import { tamKatalogYukle } from "./data/catalog";
 import { Karsilama } from "./screens/Karsilama";
 import { Anket } from "./screens/Anket";
 import { Onerilerim } from "./screens/Onerilerim";
@@ -14,6 +15,12 @@ export default function App() {
   const { hesap } = useStore();
   const [anketAcik, setAnketAcik] = useState(false);
   const [sekme, setSekme] = useState<Sekme>("onerilerim");
+
+  // Tam katalog (29 bin parfüm) uygulama açılır açılmaz arka planda yüklenir;
+  // kullanıcı ankette ilerlerken indirme tamamlanmış olur.
+  useEffect(() => {
+    tamKatalogYukle();
+  }, []);
 
   const sekmeyeGec = (s: Sekme) => {
     if (s !== sekme) sayfaGecisi(() => setSekme(s));

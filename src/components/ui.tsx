@@ -6,6 +6,7 @@ import { KATALOG } from "../data/catalog";
 import { bunaBenzer } from "../engine/recommend";
 import { toplulukVerisi, oyFormat } from "../engine/topluluk";
 import { useStore } from "../state/store";
+import { useKatalogSurumu } from "../state/useKatalog";
 
 export function Aurora() {
   return (
@@ -344,7 +345,9 @@ export function DetayPanel({
 }) {
   const { hesap, favoriToggle, tiklamaKaydet } = useStore();
   const favori = hesap?.favoriler.includes(parfum.id) ?? false;
-  const benzerler = useMemo(() => bunaBenzer(parfum, KATALOG, 6), [parfum]);
+  const katalogSurum = useKatalogSurumu();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const benzerler = useMemo(() => bunaBenzer(parfum, KATALOG, 6), [parfum, katalogSurum]);
   const topluluk = useMemo(() => toplulukVerisi(parfum), [parfum]);
   const [karsiB, setKarsiB] = useState<Parfum | null>(null);
   const [karsiSecimAcik, setKarsiSecimAcik] = useState(false);

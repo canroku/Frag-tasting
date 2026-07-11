@@ -8,6 +8,7 @@ import { useStore } from "../state/store";
 import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum, SiseGorsel, SkorHalka } from "../components/ui";
 import { AILE_RENK, AILE_ETIKET, AILELER, type Aile } from "../engine/types";
 import { clamp01 } from "../engine/vector";
+import { useKatalogSurumu } from "../state/useKatalog";
 
 // Ruh hali → aile vurgusu: seçilince profil geçici olarak o yöne eğilir
 const RUH_HALLERI: { id: string; etiket: string; emoji: string; aileler: Partial<Record<Aile, number>> }[] = [
@@ -38,6 +39,7 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
   const [oneriler, setOneriler] = useState<Oneri[]>([]);
   const [ruhHali, setRuhHali] = useState<string | null>(null);
   const [duelloAcik, setDuelloAcik] = useState(false);
+  const katalogSurum = useKatalogSurumu(); // tam katalog gelince seçki tazelenir
 
   const profil = hesap?.profil ?? null;
 
@@ -57,7 +59,7 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
     }, tur === 0 ? 1600 : 700); // koku partikülleri animasyonu için kısa bekleme
     return () => clearTimeout(zaman);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profilImza, tur, ruhHali, duelloAcik]);
+  }, [profilImza, tur, ruhHali, duelloAcik, katalogSurum]);
 
   if (!profil) {
     return (

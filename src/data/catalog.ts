@@ -1,5 +1,4 @@
 import type { Parfum } from "../engine/types";
-import { KATALOG_EK } from "./katalog_ek";
 
 // Fragrantica yalnızca yönlendirme (referral) hedefi olarak kullanılır (Bölüm 9).
 // Derin link yerine arama linki: içerik kazınmaz, sadece yönlendirilir.
@@ -1095,11 +1094,106 @@ const TEMEL_KATALOG: Parfum[] = [
     notalar: { tepe: ["seftali", "bergamot"], kalp: ["tuberoz", "yasemin", "iris"], dip: ["vanilya", "misk", "sandal"] },
     mevsim: { sonbahar: 0.7, ilkbahar: 0.7, kis: 0.6, yaz: 0.4 }, ortam: { ozel: 0.85, gece: 0.8, gunluk: 0.45, is: 0.35 },
     yogunluk: 0.8, kalicilik: 0.85, nis_mi: true, fiyat_seviyesi: "luks", populerlik: 0.7, fragrantica_url: frag("Nishane Hundred Silent Ways") },
+  // ---- Güncel çıkışlar (2023-2025) — elle etiketli ----
+  { id: "p_151", ad: "MYSLF", marka: "Yves Saint Laurent", yil: 2023, cinsiyet: "erkek",
+    aileler: { cicek: 0.6, odunsu: 0.6, aromatik: 0.4 },
+    notalar: { tepe: ["bergamot"], kalp: ["portakal_cicegi"], dip: ["paculi", "amber", "misk"] },
+    mevsim: { ilkbahar: 0.8, sonbahar: 0.7, yaz: 0.6, kis: 0.5 }, ortam: { gunluk: 0.8, is: 0.75, gece: 0.65, ozel: 0.7 },
+    yogunluk: 0.65, kalicilik: 0.7, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.85, fragrantica_url: frag("YSL MYSLF") },
+  { id: "p_152", ad: "Sauvage Eau Forte", marka: "Dior", yil: 2025, cinsiyet: "erkek",
+    aileler: { aromatik: 0.8, odunsu: 0.5, amber: 0.4 },
+    notalar: { tepe: ["bergamot", "kakule"], kalp: ["lavanta", "karabiber"], dip: ["amber", "sedir", "misk"] },
+    mevsim: { ilkbahar: 0.7, sonbahar: 0.7, yaz: 0.6, kis: 0.55 }, ortam: { gunluk: 0.75, is: 0.7, gece: 0.7, ozel: 0.7 },
+    yogunluk: 0.75, kalicilik: 0.8, nis_mi: false, fiyat_seviyesi: "luks", populerlik: 0.85, fragrantica_url: frag("Dior Sauvage Eau Forte") },
+  { id: "p_153", ad: "Acqua di Giò Parfum", marka: "Giorgio Armani", yil: 2023, cinsiyet: "erkek",
+    aileler: { aromatik: 0.8, odunsu: 0.5, amber: 0.4 },
+    notalar: { tepe: ["su_notalari", "bergamot"], kalp: ["biberiye", "adacayi"], dip: ["tutsu", "paculi", "sedir"] },
+    mevsim: { yaz: 0.75, ilkbahar: 0.7, sonbahar: 0.6, kis: 0.45 }, ortam: { gunluk: 0.8, is: 0.8, gece: 0.6, ozel: 0.7 },
+    yogunluk: 0.7, kalicilik: 0.8, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.85, fragrantica_url: frag("Acqua di Gio Parfum") },
+  { id: "p_154", ad: "Le Male Elixir", marka: "Jean Paul Gaultier", yil: 2023, cinsiyet: "erkek",
+    aileler: { gurme: 0.8, amber: 0.6, fujer: 0.4 },
+    notalar: { tepe: ["lavanta", "nane"], kalp: ["vanilya", "bal"], dip: ["tutun", "tonka", "benzoin"] },
+    mevsim: { kis: 0.9, sonbahar: 0.85, ilkbahar: 0.3, yaz: 0.15 }, ortam: { gece: 0.95, ozel: 0.85, gunluk: 0.3, is: 0.2 },
+    yogunluk: 0.9, kalicilik: 0.9, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.9, fragrantica_url: frag("Le Male Elixir") },
+  { id: "p_155", ad: "Goddess", marka: "Burberry", yil: 2023, cinsiyet: "kadin",
+    aileler: { gurme: 0.8, aromatik: 0.4 },
+    notalar: { tepe: ["lavanta"], kalp: ["vanilya", "kakao"], dip: ["vanilya", "misk"] },
+    mevsim: { kis: 0.8, sonbahar: 0.75, ilkbahar: 0.45, yaz: 0.3 }, ortam: { gece: 0.75, gunluk: 0.65, ozel: 0.7, is: 0.4 },
+    yogunluk: 0.7, kalicilik: 0.75, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.85, fragrantica_url: frag("Burberry Goddess") },
+  { id: "p_156", ad: "Miss Dior Parfum", marka: "Dior", yil: 2024, cinsiyet: "kadin",
+    aileler: { cicek: 0.7, gurme: 0.5, amber: 0.4 },
+    notalar: { tepe: ["mandalina"], kalp: ["gul", "yasemin"], dip: ["amber", "vanilya", "sandal"] },
+    mevsim: { sonbahar: 0.75, ilkbahar: 0.7, kis: 0.6, yaz: 0.4 }, ortam: { ozel: 0.8, gece: 0.75, gunluk: 0.6, is: 0.5 },
+    yogunluk: 0.75, kalicilik: 0.8, nis_mi: false, fiyat_seviyesi: "luks", populerlik: 0.8, fragrantica_url: frag("Miss Dior Parfum 2024") },
+  { id: "p_157", ad: "Paradoxe Intense", marka: "Prada", yil: 2023, cinsiyet: "kadin",
+    aileler: { cicek: 0.7, amber: 0.6 },
+    notalar: { tepe: ["armut", "mandalina"], kalp: ["neroli", "yasemin"], dip: ["amber", "vanilya", "misk"] },
+    mevsim: { sonbahar: 0.75, kis: 0.65, ilkbahar: 0.6, yaz: 0.4 }, ortam: { gece: 0.75, ozel: 0.75, gunluk: 0.6, is: 0.5 },
+    yogunluk: 0.75, kalicilik: 0.8, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.8, fragrantica_url: frag("Prada Paradoxe Intense") },
+  { id: "p_158", ad: "Devotion", marka: "Dolce & Gabbana", yil: 2023, cinsiyet: "kadin",
+    aileler: { gurme: 0.8, cicek: 0.5 },
+    notalar: { tepe: ["limon"], kalp: ["portakal_cicegi"], dip: ["vanilya", "misk"] },
+    mevsim: { sonbahar: 0.7, kis: 0.65, ilkbahar: 0.6, yaz: 0.45 }, ortam: { gunluk: 0.7, ozel: 0.7, gece: 0.65, is: 0.45 },
+    yogunluk: 0.7, kalicilik: 0.7, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.8, fragrantica_url: frag("Dolce Gabbana Devotion") },
+  { id: "p_159", ad: "Yara", marka: "Lattafa", yil: 2020, cinsiyet: "kadin",
+    aileler: { gurme: 0.8, cicek: 0.4 },
+    notalar: { tepe: ["heliotrop"], kalp: ["mango", "seker_kamisi"], dip: ["vanilya", "misk"] },
+    mevsim: { kis: 0.7, sonbahar: 0.7, ilkbahar: 0.55, yaz: 0.4 }, ortam: { gunluk: 0.75, gece: 0.65, ozel: 0.6, is: 0.4 },
+    yogunluk: 0.7, kalicilik: 0.7, nis_mi: false, fiyat_seviyesi: "ekonomik", populerlik: 0.9, fragrantica_url: frag("Lattafa Yara") },
+  { id: "p_160", ad: "Eclaire", marka: "Lattafa", yil: 2023, cinsiyet: "kadin",
+    aileler: { gurme: 0.9 },
+    notalar: { tepe: ["karamel"], kalp: ["bal", "vanilya"], dip: ["misk", "seker_kamisi"] },
+    mevsim: { kis: 0.85, sonbahar: 0.8, ilkbahar: 0.35, yaz: 0.2 }, ortam: { gunluk: 0.65, gece: 0.7, ozel: 0.6, is: 0.35 },
+    yogunluk: 0.8, kalicilik: 0.75, nis_mi: false, fiyat_seviyesi: "ekonomik", populerlik: 0.85, fragrantica_url: frag("Lattafa Eclaire") },
+  { id: "p_161", ad: "Khamrah Qahwa", marka: "Lattafa", yil: 2023, cinsiyet: "unisex",
+    aileler: { gurme: 0.9, amber: 0.5 },
+    notalar: { tepe: ["tarcin", "kakule", "zencefil"], kalp: ["kahve", "hurma"], dip: ["vanilya", "tonka", "benzoin"] },
+    mevsim: { kis: 0.9, sonbahar: 0.85, ilkbahar: 0.25, yaz: 0.15 }, ortam: { gece: 0.85, ozel: 0.75, gunluk: 0.45, is: 0.3 },
+    yogunluk: 0.85, kalicilik: 0.85, nis_mi: false, fiyat_seviyesi: "ekonomik", populerlik: 0.85, fragrantica_url: frag("Lattafa Khamrah Qahwa") },
+  { id: "p_162", ad: "Phantom", marka: "Paco Rabanne", yil: 2021, cinsiyet: "erkek",
+    aileler: { aromatik: 0.7, gurme: 0.5, odunsu: 0.4 },
+    notalar: { tepe: ["lavanta", "limon"], kalp: ["yesil_yapraklar", "lavanta"], dip: ["vanilya", "paculi", "vetiver"] },
+    mevsim: { ilkbahar: 0.7, sonbahar: 0.65, yaz: 0.55, kis: 0.5 }, ortam: { gunluk: 0.75, gece: 0.7, is: 0.6, ozel: 0.6 },
+    yogunluk: 0.65, kalicilik: 0.65, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.8, fragrantica_url: frag("Paco Rabanne Phantom") },
+  { id: "p_163", ad: "Born in Roma Donna", marka: "Valentino", yil: 2019, cinsiyet: "kadin",
+    aileler: { cicek: 0.7, gurme: 0.6 },
+    notalar: { tepe: ["frenk_uzumu", "bergamot"], kalp: ["yasemin"], dip: ["vanilya", "misk", "sedir"] },
+    mevsim: { sonbahar: 0.7, ilkbahar: 0.65, kis: 0.6, yaz: 0.45 }, ortam: { gunluk: 0.7, gece: 0.7, ozel: 0.7, is: 0.5 },
+    yogunluk: 0.7, kalicilik: 0.7, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.85, fragrantica_url: frag("Valentino Born in Roma Donna") },
+  { id: "p_164", ad: "Born in Roma Uomo", marka: "Valentino", yil: 2019, cinsiyet: "erkek",
+    aileler: { aromatik: 0.6, gurme: 0.5, odunsu: 0.5 },
+    notalar: { tepe: ["zencefil", "adacayi"], kalp: ["menekse", "lavanta"], dip: ["vanilya", "vetiver", "sedir"] },
+    mevsim: { sonbahar: 0.7, kis: 0.65, ilkbahar: 0.6, yaz: 0.45 }, ortam: { gunluk: 0.75, gece: 0.7, is: 0.6, ozel: 0.65 },
+    yogunluk: 0.7, kalicilik: 0.7, nis_mi: false, fiyat_seviyesi: "orta", populerlik: 0.85, fragrantica_url: frag("Valentino Born in Roma Uomo") },
 ];
 
-// Çekirdek katalog + CSV içe aktarma hattından gelen ek katalog
-export const KATALOG: Parfum[] = [...TEMEL_KATALOG, ...KATALOG_EK];
+
+// Çekirdek katalog anında hazır; 29 binlik tam katalog arka planda
+// tembel yüklenir (kod bölme) — uygulama kabuğu beklemez.
+export const KATALOG: Parfum[] = [...TEMEL_KATALOG];
 
 export const PARFUM_MAP: Record<string, Parfum> = Object.fromEntries(
   KATALOG.map((p) => [p.id, p])
 );
+
+let surum = 0;
+let yukleniyor: Promise<void> | null = null;
+const dinleyiciler = new Set<() => void>();
+
+export const katalogSurumu = () => surum;
+export function katalogDinle(cb: () => void): () => void {
+  dinleyiciler.add(cb);
+  return () => dinleyiciler.delete(cb);
+}
+
+export function tamKatalogYukle(): Promise<void> {
+  if (!yukleniyor) {
+    yukleniyor = import("./katalog_ek").then(({ KATALOG_EK }) => {
+      KATALOG.push(...KATALOG_EK);
+      for (const p of KATALOG_EK) PARFUM_MAP[p.id] = p;
+      surum++;
+      dinleyiciler.forEach((cb) => cb());
+    });
+  }
+  return yukleniyor;
+}

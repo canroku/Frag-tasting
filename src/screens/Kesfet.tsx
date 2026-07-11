@@ -7,6 +7,7 @@ import type { Aile, Cinsiyet, Fiyat, Mevsim, Ortam } from "../engine/types";
 import { NOTALAR } from "../data/notes";
 import { useStore } from "../state/store";
 import { ParfumKart, DetayPanel, useDetay, BosDurum } from "../components/ui";
+import { useKatalogSurumu } from "../state/useKatalog";
 
 export function Kesfet() {
   const { hesap, aramaKaydet } = useStore();
@@ -21,9 +22,11 @@ export function Kesfet() {
     return () => clearTimeout(z);
   }, [metinHam]);
 
+  const katalogSurum = useKatalogSurumu();
   const sonuclar = useMemo(
     () => ara(KATALOG, filtre, hesap?.profil ?? null),
-    [filtre, hesap?.profil]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtre, hesap?.profil, katalogSurum]
   );
 
   // filtre değişince sayfalamayı başa sar
@@ -44,7 +47,10 @@ export function Kesfet() {
     <div className="girisAnim">
       <div className="bolumBaslik">
         <h2>Keşfet</h2>
-        <span className="sayi">{sonuclar.length} sonuç</span>
+        <span className="sayi">
+          {sonuclar.length.toLocaleString("tr-TR")} sonuç
+          {katalogSurum === 0 && " · tam katalog yükleniyor…"}
+        </span>
       </div>
       <p className="bolumAlt">
         Katalogdaki {KATALOG.length} parfümün tamamına buradan ulaşırsın — adıyla,

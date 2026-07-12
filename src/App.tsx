@@ -7,9 +7,10 @@ import { Karsilama } from "./screens/Karsilama";
 import { Anket } from "./screens/Anket";
 import { Onerilerim } from "./screens/Onerilerim";
 import { Kesfet } from "./screens/Kesfet";
+import { Koleksiyonlar } from "./screens/Koleksiyonlar";
 import { Profil } from "./screens/Profil";
 
-type Sekme = "onerilerim" | "kesfet" | "profil";
+type Sekme = "onerilerim" | "kesfet" | "koleksiyonlar" | "profil";
 
 export default function App() {
   const { hesap } = useStore();
@@ -59,6 +60,7 @@ export default function App() {
             </button>
             <nav className="sekmeler">
               <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
+              <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>Koleksiyonlar</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
             </nav>
             <button
@@ -87,6 +89,8 @@ export default function App() {
           />
         ) : sekme === "onerilerim" ? (
           <Onerilerim onAnketeDon={anketiAc} />
+        ) : sekme === "koleksiyonlar" ? (
+          <Koleksiyonlar />
         ) : sekme === "kesfet" ? (
           <Kesfet />
         ) : (
@@ -98,6 +102,9 @@ export default function App() {
         <nav className="altBar">
           <button className={`sekme ${sekme === "onerilerim" ? "aktif" : ""}`} onClick={() => sekmeyeGec("onerilerim")}>
             <span className="ikon">✦</span>Seçkin
+          </button>
+          <button className={`sekme ${sekme === "koleksiyonlar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("koleksiyonlar")}>
+            <span className="ikon">📚</span>Seçkiler
           </button>
           <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => sekmeyeGec("kesfet")}>
             <span className="ikon">⌕</span>Keşfet

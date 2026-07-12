@@ -649,6 +649,54 @@ h1, h2, h3, .serif {
 .markaGirdi { min-width: 150px; }
 .markaGirdi::placeholder { color: var(--cream-60); }
 
+/* ---------- Koleksiyonlar sayfası ---------- */
+.kolSeritler { display: flex; flex-direction: column; gap: 40px; margin-top: 24px; }
+.kolSerit { animation: yukari var(--dur) var(--ease) both; }
+.kolSeritBas { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
+.kolSeritBas h3 { font-size: clamp(20px, 3vw, 26px); }
+.kolSeritBas .minik { margin-top: 3px; max-width: 60ch; }
+.kolEmoji { margin-right: 4px; }
+.kolSeritBas .btn { flex-shrink: 0; }
+
+.kolRaf {
+  display: flex; gap: 14px; overflow-x: auto;
+  padding: 4px 2px 14px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.kolRaf::-webkit-scrollbar { height: 6px; }
+
+.miniKart {
+  position: relative;
+  flex-shrink: 0;
+  width: 180px;
+  padding: 0 0 14px;
+  scroll-snap-align: start;
+  overflow: hidden;
+  transition: transform 260ms var(--ease), border-color 260ms var(--ease);
+}
+.miniKart:hover { transform: translateY(-4px); border-color: rgba(251, 247, 241, 0.22); }
+.miniSise {
+  width: 100%; height: 150px;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(75% 90% at 50% 115%, color-mix(in srgb, var(--sahne) 30%, transparent), transparent 72%),
+    rgba(18, 5, 16, 0.3);
+  cursor: pointer;
+}
+.miniSise .sise { height: 120px; transition: transform 300ms var(--ease); }
+.miniKart:hover .miniSise .sise { transform: scale(1.05) rotate(-2deg); }
+.kalpMini { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; font-size: 14px; background: rgba(18, 5, 16, 0.5); backdrop-filter: blur(4px); }
+.miniBilgi { padding: 12px 14px 0; cursor: pointer; }
+.miniAd { font-size: 16px; line-height: 1.2; margin: 3px 0 5px; }
+
+@media (max-width: 720px) {
+  .kolSeritBas .btn { padding: 8px 14px; font-size: 12px; }
+  .miniKart { width: 156px; }
+  .miniSise { height: 128px; }
+  .miniSise .sise { height: 104px; }
+}
+
 /* ---------- Gerçek fotoğraf desteği ---------- */
 .siseFoto { object-fit: contain; border-radius: 10px; }
 

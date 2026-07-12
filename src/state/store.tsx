@@ -13,6 +13,22 @@ export interface Liste {
   parfumler: string[];
 }
 
+// Koku günlüğü kaydı — "bugün ne süründün?" (SOTD: Scent of the Day)
+export interface GunlukKayit {
+  tarih: string; // YYYY-MM-DD
+  parfumId: string;
+  not?: string;
+}
+
+// Günlük seri (streak) — üst üste kaç gün uygulamaya girildi
+export interface Seri {
+  gun: number; // mevcut seri
+  enUzun: number;
+  sonZiyaret: string; // YYYY-MM-DD
+}
+
+export const bugunISO = () => new Date().toISOString().slice(0, 10);
+
 export interface Hesap {
   email: string;
   ad: string;
@@ -26,6 +42,8 @@ export interface Hesap {
   oneriGecmisi: string[]; // tekrarları azaltmak için
   geriBildirim: Record<string, "begen" | "begenme">;
   duello_sayisi?: number; // Koku Düellosu tur sayısı (rozetler için)
+  gunluk?: GunlukKayit[]; // koku günlüğü (SOTD)
+  seri?: Seri; // günlük giriş serisi
 }
 
 const HESAP_KEY = "frag_hesaplar_v1";
@@ -65,9 +83,16 @@ interface StoreDegerleri {
   oneriGecmisineEkle: (ids: string[]) => void;
   geriBildirimVer: (id: string, tur: "begen" | "begenme") => void;
   duelloKaydet: (kazananId: string) => void;
+  gunlugeEkle: (parfumId: string, not?: string) => void;
+  gunluktenCikar: (tarih: string) => void;
 }
 
 const StoreContext = createContext<StoreDegerleri | null>(null);
+
+// İki ISO tarih arasındaki gün farkı
+function gunFarki(a: string, b: string): number {
+  return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [hesap, setHesap] = useState<Hesap | null>(() => {
@@ -83,6 +108,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     h[hesap.email] = hesap;
     hesaplariYaz(h);
   }, [hesap]);
+
+  // Günlük seri: oturum açık her gün ilk girişte güncellenir
+  useEffect(() => {
+    if (!hesap) return;
+    const bugun = bugunISO();
+    const s = hesap.seri;
+    if (s?.sonZiyaret === bugun) return; // bugün zaten sayıldı
+    setHesap((eski) => {
+      if (!eski) return eski;
+      const onceki = eski.seri;
+      let gun = 1;
+      if (onceki) {
+        const fark = gunFarki(onceki.sonZiyaret, bugun);
+        gun = fark === 1 ? onceki.gun + 1 : fark <= 0 ? onceki.gun : 1;
+      }
+      const enUzun = Math.max(onceki?.enUzun ?? 0, gun);
+      return { ...eski, seri: { gun, enUzun, sonZiyaret: bugun } };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hesap?.email]);
 
   const degerler = useMemo<StoreDegerleri>(() => {
     const guncelle = (fn: (h: Hesap) => Hesap) =>
@@ -215,6 +260,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             !ayni && h.profil ? geriBildirimUygula(h.profil, id, tur) : h.profil;
           return { ...h, geriBildirim, profil };
         });
+      },
+      gunlugeEkle(parfumId, not) {
+        const tarih = bugunISO();
+        guncelle((h) => {
+          const gunluk = [
+            { tarih, parfumId, not },
+            ...(h.gunluk ?? []).filter((g) => g.tarih !== tarih), // günde tek kayıt
+          ];
+          // günlüğe eklemek beğeni sinyali: profil buna göre keskinleşir
+          const profil = h.profil ? geriBildirimUygula(h.profil, parfumId, "favori") : h.profil;
+          return { ...h, gunluk, profil };
+        });
+      },
+      gunluktenCikar(tarih) {
+        guncelle((h) => ({ ...h, gunluk: (h.gunluk ?? []).filter((g) => g.tarih !== tarih) }));
       },
     };
   }, [hesap]);

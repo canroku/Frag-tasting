@@ -107,6 +107,26 @@ export function Profil({ onAnketeDon }: { onAnketeDon: () => void }) {
         </section>
       )}
 
+      {/* 🔥 Günlük seri + istatistik şeridi */}
+      <div className="seriSerit cam">
+        <div className="seriKutu">
+          <span className="seriBuyuk">🔥 {hesap.seri?.gun ?? 1}</span>
+          <span className="minik">günlük seri</span>
+        </div>
+        <div className="seriKutu">
+          <span className="seriBuyuk">{hesap.seri?.enUzun ?? 1}</span>
+          <span className="minik">en uzun seri</span>
+        </div>
+        <div className="seriKutu">
+          <span className="seriBuyuk">{hesap.gunluk?.length ?? 0}</span>
+          <span className="minik">günlük kaydı</span>
+        </div>
+        <div className="seriKutu">
+          <span className="seriBuyuk">{favoriler.length}</span>
+          <span className="minik">favori</span>
+        </div>
+      </div>
+
       <div className="profilIzgara">
         {/* Koku profili */}
         <div className="profilKart cam">
@@ -236,6 +256,29 @@ export function Profil({ onAnketeDon }: { onAnketeDon: () => void }) {
               );
             })}
           </div>
+        </div>
+
+        {/* Koku Günlüğü geçmişi */}
+        <div className="profilKart cam">
+          <h3>📖 Koku Günlüğün</h3>
+          {(hesap.gunluk?.length ?? 0) === 0 ? (
+            <p className="minik">Ana ekrandan "Bugün ne süründün?" ile günlük tutmaya başla — serini büyüt, zevkini kaydet.</p>
+          ) : (
+            <div>
+              {hesap.gunluk!.slice(0, 10).map((g) => {
+                const p = PARFUM_MAP[g.parfumId];
+                if (!p) return null;
+                return (
+                  <div key={g.tarih} className="gunlukSatir">
+                    <span className="gunlukTarih">{new Date(g.tarih).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}</span>
+                    <button className="minik gunlukAd" onClick={() => detay.ac(p)}>
+                      <strong>{p.ad}</strong> · {p.marka}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Geçmiş */}

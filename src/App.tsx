@@ -85,6 +85,11 @@ export default function App() {
               <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>Koleksiyonlar</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
             </nav>
+            {(hesap.seri?.gun ?? 0) >= 2 && (
+              <button className="seriRozet" onClick={() => sekmeyeGec("profil")} title={`${hesap.seri!.gun} günlük seri`}>
+                🔥 {hesap.seri!.gun}
+              </button>
+            )}
             <TemaBtn tema={tema} onDegis={temaDegis} />
             <button
               className={`avatar ${sekme === "profil" ? "aktif" : ""}`}

@@ -6,6 +6,7 @@ import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
 import { KATALOG } from "../data/catalog";
 import { bunaBenzer, muadilBul } from "../engine/recommend";
 import { toplulukVerisi, oyFormat } from "../engine/topluluk";
+import { gorselKaynak } from "../data/gorsel";
 import { useStore } from "../state/store";
 import { useKatalogSurumu } from "../state/useKatalog";
 
@@ -63,14 +64,18 @@ function idHash(metin: string): number {
 }
 
 export function SiseGorsel({ parfum, buyuk = false }: { parfum: Parfum; buyuk?: boolean }) {
-  // Lisanslı gerçek ürün fotoğrafı tanımlıysa onu kullan
-  if (parfum.gorsel_url) {
+  // Gerçek ürün fotoğrafı tanımlıysa onu göster; yüklenemezse (kırık link,
+  // ağ hatası, engelli host) sessizce illüstrasyona düş.
+  const [fotoHata, setFotoHata] = useState(false);
+  const gorsel = gorselKaynak(parfum);
+  if (gorsel && !fotoHata) {
     return (
       <img
-        src={parfum.gorsel_url}
+        src={gorsel}
         alt={`${parfum.marka} ${parfum.ad} şişesi`}
         className={buyuk ? "sise siseBuyuk siseFoto" : "sise siseFoto"}
         loading="lazy"
+        onError={() => setFotoHata(true)}
       />
     );
   }

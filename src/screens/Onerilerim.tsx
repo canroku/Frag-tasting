@@ -1,6 +1,6 @@
 // Bölüm 6 sonuç ekranı: kart galerisi, "neden önerildi", favori kalbi, tazele,
 // ruh hali modu ve Koku Düellosu
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { KATALOG } from "../data/catalog";
 import { oneriUret, sertFiltre } from "../engine/recommend";
 import type { Oneri, Parfum, ProfilVektoru } from "../engine/types";
@@ -10,6 +10,7 @@ import { AILE_RENK, AILE_ETIKET, AILELER, type Aile } from "../engine/types";
 import { clamp01 } from "../engine/vector";
 import { useKatalogSurumu } from "../state/useKatalog";
 import { vakitIpucu } from "../engine/selam";
+import { SotdKart } from "../components/KokuGunlugu";
 
 // Ruh hali → aile vurgusu: seçilince profil geçici olarak o yöne eğilir
 const RUH_HALLERI: { id: string; etiket: string; emoji: string; aileler: Partial<Record<Aile, number>> }[] = [
@@ -46,18 +47,26 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
 
   // Profil imzası: geri bildirimle vektör değiştikçe öneriler canlı güncellenir
   const profilImza = useMemo(() => JSON.stringify(profil), [profil]);
+  // Yükleme ekranı yalnızca büyük değişikliklerde (ilk yük, tazele, ruh hali)
+  // gösterilir; küçük geri bildirim (👍/👎, günlük kaydı) sessizce güncellenir.
+  const buyukDegisim = useRef({ tur, ruhHali });
 
   useEffect(() => {
     // Düello sürerken yeniden hesaplama ertelenir; pencere kapanınca
     // biriken tüm galibiyet sinyalleriyle seçki tek seferde tazelenir.
     if (!profil || duelloAcik) return;
-    setHazirlaniyor(true);
+    const manuel =
+      oneriler.length === 0 ||
+      buyukDegisim.current.tur !== tur ||
+      buyukDegisim.current.ruhHali !== ruhHali;
+    buyukDegisim.current = { tur, ruhHali };
+    if (manuel) setHazirlaniyor(true);
     const haric = tur > 0 ? new Set(hesap?.oneriGecmisi ?? []) : new Set<string>();
     const efektif = ruhHaliUygula(profil, ruhHali);
     const zaman = setTimeout(() => {
       setOneriler(oneriUret(efektif, KATALOG, { n: 12, haric }));
       setHazirlaniyor(false);
-    }, tur === 0 ? 1600 : 700); // koku partikülleri animasyonu için kısa bekleme
+    }, manuel ? (tur === 0 ? 1600 : 700) : 0); // sessiz güncelleme anında
     return () => clearTimeout(zaman);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profilImza, tur, ruhHali, duelloAcik, katalogSurum]);
@@ -89,6 +98,7 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
 
   return (
     <div className="girisAnim">
+      <SotdKart onDetay={detay.ac} />
       {gununKokusu && (
         <GununKokusu oneri={gununKokusu} onDetay={detay.ac} />
       )}

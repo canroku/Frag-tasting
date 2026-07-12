@@ -725,6 +725,48 @@ h1, h2, h3, .serif {
 .markaGirdi { min-width: 150px; }
 .markaGirdi::placeholder { color: var(--cream-60); }
 
+/* ---------- Seri rozeti (header) ---------- */
+.seriRozet {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 7px 12px; border-radius: 999px;
+  font-size: 13.5px; font-weight: 700;
+  background: linear-gradient(135deg, rgba(217, 138, 91, 0.2), rgba(217, 106, 106, 0.16));
+  border: 1px solid rgba(217, 138, 91, 0.35);
+  color: var(--amber-bright);
+  font-variant-numeric: tabular-nums;
+  transition: transform 200ms var(--ease);
+  flex-shrink: 0;
+}
+.seriRozet:hover { transform: scale(1.06); }
+@media (max-width: 720px) { .seriRozet { display: none; } }
+
+/* ---------- Koku Günlüğü (SOTD) kartı ---------- */
+.sotdKart { padding: 22px clamp(18px, 3vw, 28px); margin-top: 24px; }
+.sotdBas { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.sotdBos { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.sotdBos p { color: var(--cream-60); font-size: 14.5px; max-width: 52ch; }
+.sotdDolu { display: flex; gap: 18px; align-items: center; }
+.sotdSise { width: 92px; height: 118px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.sotdSise .sise { height: 108px; transition: transform 300ms var(--ease); }
+.sotdSise:hover .sise { transform: translateY(-3px) rotate(-2deg); }
+.sotdSecici { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- Profil seri şeridi ---------- */
+.seriSerit {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+  padding: 20px; margin-top: 22px;
+  text-align: center; overflow: hidden;
+}
+.seriKutu { display: flex; flex-direction: column; gap: 3px; padding: 6px; }
+.seriBuyuk { font-family: var(--font-serif); font-size: clamp(24px, 4vw, 34px); color: var(--accent); font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) { .seriSerit { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+
+/* ---------- Günlük geçmiş satırı ---------- */
+.gunlukSatir { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--hairline); }
+.gunlukSatir:last-child { border-bottom: none; }
+.gunlukTarih { font-size: 12px; color: var(--cream-40); min-width: 52px; white-space: nowrap; }
+.gunlukAd { text-align: left; }
+
 /* ---------- Koleksiyonlar sayfası ---------- */
 .kolSeritler { display: flex; flex-direction: column; gap: 40px; margin-top: 24px; }
 .kolSerit { animation: yukari var(--dur) var(--ease) both; }

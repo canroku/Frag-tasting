@@ -12,16 +12,37 @@ import { Profil } from "./screens/Profil";
 
 type Sekme = "onerilerim" | "kesfet" | "koleksiyonlar" | "profil";
 
+type Tema = "koyu" | "aydinlik";
+
+// İlk açılışta tema: kayıtlı tercih varsa o, yoksa saate göre (gündüz=sabah,
+// gece=koyu). 7:00–19:00 arası sabah modu.
+function baslangicTema(): Tema {
+  const kayitli = localStorage.getItem("frag_tema");
+  if (kayitli === "koyu" || kayitli === "aydinlik") return kayitli;
+  const saat = new Date().getHours();
+  return saat >= 7 && saat < 19 ? "aydinlik" : "koyu";
+}
+
 export default function App() {
   const { hesap } = useStore();
   const [anketAcik, setAnketAcik] = useState(false);
   const [sekme, setSekme] = useState<Sekme>("onerilerim");
+  const [tema, setTema] = useState<Tema>(baslangicTema);
 
   // Tam katalog (29 bin parfüm) uygulama açılır açılmaz arka planda yüklenir;
   // kullanıcı ankette ilerlerken indirme tamamlanmış olur.
   useEffect(() => {
     tamKatalogYukle();
   }, []);
+
+  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır
+  useEffect(() => {
+    document.documentElement.dataset.tema = tema;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "aydinlik" ? "#f7f1e8" : "#14060f");
+    localStorage.setItem("frag_tema", tema);
+  }, [tema]);
+
+  const temaDegis = () => sayfaGecisi(() => setTema((t) => (t === "koyu" ? "aydinlik" : "koyu")), "sekme");
 
   const sekmeyeGec = (s: Sekme) => {
     if (s !== sekme) sayfaGecisi(() => setSekme(s));
@@ -47,6 +68,7 @@ export default function App() {
   return (
     <>
       <Aurora />
+      {!girisliVeAnketli && <TemaBtn tema={tema} onDegis={temaDegis} serbest />}
       {girisliVeAnketli && (
         <header className="ustCubuk">
           <div className="ustCubukIc">
@@ -63,6 +85,7 @@ export default function App() {
               <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>Koleksiyonlar</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
             </nav>
+            <TemaBtn tema={tema} onDegis={temaDegis} />
             <button
               className={`avatar ${sekme === "profil" ? "aktif" : ""}`}
               onClick={() => sekmeyeGec("profil")}
@@ -122,6 +145,21 @@ function SekmeBtn({ aktif, onClick, children }: { aktif: boolean; onClick: () =>
   return (
     <button className={`sekme ${aktif ? "aktif" : ""}`} onClick={onClick}>
       {children}
+    </button>
+  );
+}
+
+// Gece ↔ sabah modu düğmesi. serbest=true iken (karşılama) sağ üstte sabit.
+function TemaBtn({ tema, onDegis, serbest = false }: { tema: Tema; onDegis: () => void; serbest?: boolean }) {
+  const sabah = tema === "aydinlik";
+  return (
+    <button
+      className={`temaBtn ${serbest ? "temaBtnSerbest" : ""}`}
+      onClick={onDegis}
+      title={sabah ? "Gece moduna geç" : "Sabah moduna geç"}
+      aria-label={sabah ? "Gece moduna geç" : "Sabah moduna geç"}
+    >
+      {sabah ? "🌙" : "☀️"}
     </button>
   );
 }

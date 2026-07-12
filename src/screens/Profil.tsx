@@ -7,6 +7,7 @@ import type { Parfum } from "../engine/types";
 import { ParfumKart, DetayPanel, useDetay, BosDurum, SiseGorsel } from "../components/ui";
 import { kokuDna } from "../engine/dna";
 import { gardiropAnalizi } from "../engine/gardirop";
+import { selamla } from "../engine/selam";
 
 // 🏅 Rozetler — kullanım verisinden hesaplanan başarımlar
 const ROZETLER: { id: string; emoji: string; ad: string; kosulAciklama: string; kazanildi: (h: Hesap) => boolean }[] = [
@@ -54,7 +55,7 @@ export function Profil({ onAnketeDon }: { onAnketeDon: () => void }) {
   return (
     <div className="girisAnim">
       <div className="bolumBaslik">
-        <h2>Merhaba, {hesap.ad}</h2>
+        <h2>{selamla().selam}, {hesap.ad} {selamla().emoji}</h2>
       </div>
       <p className="bolumAlt">{hesap.email}</p>
 

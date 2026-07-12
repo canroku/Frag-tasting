@@ -9,6 +9,7 @@ import { ParfumKart, DetayPanel, Partikuller, useDetay, BosDurum, SiseGorsel, Sk
 import { AILE_RENK, AILE_ETIKET, AILELER, type Aile } from "../engine/types";
 import { clamp01 } from "../engine/vector";
 import { useKatalogSurumu } from "../state/useKatalog";
+import { vakitIpucu } from "../engine/selam";
 
 // Ruh hali → aile vurgusu: seçilince profil geçici olarak o yöne eğilir
 const RUH_HALLERI: { id: string; etiket: string; emoji: string; aileler: Partial<Record<Aile, number>> }[] = [
@@ -96,8 +97,8 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
         <span className="sayi">{oneriler.length} parfüm · sana göre puanlandı</span>
       </div>
       <p className="bolumAlt">
-        Her kartta <em>neden önerildiğini</em> görürsün. 👍 / 👎 ile geri bildirim ver —
-        profilin anında öğrenir ve seçki keskinleşir.
+        {vakitIpucu()} Her kartta <em>neden önerildiğini</em> görürsün. 👍 / 👎 ile
+        geri bildirim ver — profilin anında öğrenir ve seçki keskinleşir.
       </p>
       {/* Ruh hali modu: bugünkü moduna göre seçki anında yeniden puanlanır */}
       <div className="ruhKume">

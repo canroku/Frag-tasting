@@ -21,9 +21,16 @@ export function Aurora() {
 
 // Dağılan koku partikülleri (Bölüm 10 — küçük dokunuşlar)
 export function Partikuller({ adet = 18 }: { adet?: number }) {
+  // Mobilde partikül sayısını yarıya indir — eşzamanlı animasyon yükü azalır
+  const gercekAdet = useMemo(() => {
+    const dar = typeof window !== "undefined" && window.matchMedia("(max-width: 820px)").matches;
+    const azHareket = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (azHareket) return 0;
+    return dar ? Math.ceil(adet / 2) : adet;
+  }, [adet]);
   const partikuller = useMemo(
     () =>
-      Array.from({ length: adet }, (_, i) => ({
+      Array.from({ length: gercekAdet }, (_, i) => ({
         left: Math.random() * 100,
         sap: (Math.random() - 0.5) * 160,
         sure: 6 + Math.random() * 8,
@@ -31,7 +38,7 @@ export function Partikuller({ adet = 18 }: { adet?: number }) {
         boyut: 3 + Math.random() * 4,
         i,
       })),
-    [adet]
+    [gercekAdet]
   );
   return (
     <div className="partikuller" aria-hidden>

@@ -11,6 +11,7 @@ import { clamp01 } from "../engine/vector";
 import { useKatalogSurumu } from "../state/useKatalog";
 import { vakitIpucu } from "../engine/selam";
 import { SotdKart } from "../components/KokuGunlugu";
+import { AnlikGiris, AnlikModal } from "../components/AnlikOneri";
 
 // Ruh hali → aile vurgusu: seçilince profil geçici olarak o yöne eğilir
 const RUH_HALLERI: { id: string; etiket: string; emoji: string; aileler: Partial<Record<Aile, number>> }[] = [
@@ -41,6 +42,7 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
   const [oneriler, setOneriler] = useState<Oneri[]>([]);
   const [ruhHali, setRuhHali] = useState<string | null>(null);
   const [duelloAcik, setDuelloAcik] = useState(false);
+  const [anlikAcik, setAnlikAcik] = useState(false);
   const katalogSurum = useKatalogSurumu(); // tam katalog gelince seçki tazelenir
 
   const profil = hesap?.profil ?? null;
@@ -98,6 +100,7 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
 
   return (
     <div className="girisAnim">
+      <AnlikGiris onAc={() => setAnlikAcik(true)} />
       <SotdKart onDetay={detay.ac} />
       {gununKokusu && (
         <GununKokusu oneri={gununKokusu} onDetay={detay.ac} />
@@ -151,6 +154,10 @@ export function Onerilerim({ onAnketeDon }: { onAnketeDon: () => void }) {
 
       {duelloAcik && profil && (
         <KokuDuellosu profil={profil} onKapat={() => setDuelloAcik(false)} />
+      )}
+
+      {anlikAcik && (
+        <AnlikModal onKapat={() => setAnlikAcik(false)} onDetay={detay.ac} />
       )}
 
       {detay.acik && (

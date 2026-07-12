@@ -193,6 +193,17 @@ export function oneriUret(
   // filtre her şeyi elediyse geri çekil (boş sonuç yerine hariç listesini bırak)
   if (adaylar.length < 5) adaylar = sertFiltre(katalog, u);
 
+  // MOBİL PERFORMANS: 29 binlik katalogda tüm adayları tam puanlamak telefonu
+  // kilitler. Çok fazla aday varsa önce ucuz bir anahtarla (popülerlik +
+  // topluluk puanı) en umut verici ~1200'e indir, sonra tam puanla.
+  if (adaylar.length > 1200) {
+    adaylar = adaylar
+      .map((p) => ({ p, on: p.populerlik + (p.topluluk_puan ?? 0) / 5 }))
+      .sort((a, b) => b.on - a.on)
+      .slice(0, 1200)
+      .map((x) => x.p);
+  }
+
   // 3) Puanla ve sırala
   const skorlar = new Map<string, number>();
   for (const p of adaylar) skorlar.set(p.id, puanla(u, p));

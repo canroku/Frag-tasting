@@ -10,7 +10,10 @@ export function sayfaGecisi(guncelle: () => void, yon: GecisYonu = "sekme") {
     startViewTransition?: (cb: () => void) => unknown;
   };
   const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!belge.startViewTransition || azHareket) {
+  // MOBİL: View Transition tüm sayfanın anlık görüntüsünü alır; dar/dokunmatik
+  // ekranlarda bu maliyet kasmaya yol açar — geçişi atla, anında güncelle.
+  const dar = window.matchMedia("(max-width: 820px)").matches;
+  if (!belge.startViewTransition || azHareket || dar) {
     guncelle();
     return;
   }

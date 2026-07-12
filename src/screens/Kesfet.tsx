@@ -14,7 +14,9 @@ export function Kesfet() {
   const detay = useDetay();
   const [filtre, setFiltre] = useState<AramaFiltre>(BOS_FILTRE);
   const [metinHam, setMetinHam] = useState("");
-  const [limit, setLimit] = useState(48);
+  // Mobilde daha az kart yükle (24), masaüstünde 48 — telefon daha akıcı olur
+  const sayfaBoyu = typeof window !== "undefined" && window.matchMedia("(max-width: 820px)").matches ? 24 : 48;
+  const [limit, setLimit] = useState(sayfaBoyu);
 
   // 30 binlik katalogda her tuş vuruşunda arama yapmamak için kısa erteleme
   useEffect(() => {
@@ -44,7 +46,7 @@ export function Kesfet() {
   }
 
   // filtre değişince sayfalamayı başa sar
-  useEffect(() => setLimit(48), [filtre]);
+  useEffect(() => setLimit(sayfaBoyu), [filtre]);
   const gorunen = sonuclar.slice(0, limit);
 
   // arama geçmişi: yazma durunca kaydet (Bölüm 8)
@@ -165,7 +167,7 @@ export function Kesfet() {
           </div>
           {sonuclar.length > limit && (
             <div style={{ textAlign: "center", marginTop: 28 }}>
-              <button className="btn btnCizgi" onClick={() => setLimit((l) => l + 48)}>
+              <button className="btn btnCizgi" onClick={() => setLimit((l) => l + sayfaBoyu)}>
                 Daha fazla göster · kalan {(sonuclar.length - limit).toLocaleString("tr-TR")}
               </button>
             </div>

@@ -8,9 +8,10 @@ import { Anket } from "./screens/Anket";
 import { Onerilerim } from "./screens/Onerilerim";
 import { Kesfet } from "./screens/Kesfet";
 import { Koleksiyonlar } from "./screens/Koleksiyonlar";
+import { Notalar } from "./screens/Notalar";
 import { Profil } from "./screens/Profil";
 
-type Sekme = "onerilerim" | "kesfet" | "koleksiyonlar" | "profil";
+type Sekme = "onerilerim" | "kesfet" | "koleksiyonlar" | "notalar" | "profil";
 
 type Tema = "koyu" | "aydinlik";
 
@@ -83,6 +84,7 @@ export default function App() {
             <nav className="sekmeler">
               <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
               <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>Koleksiyonlar</SekmeBtn>
+              <SekmeBtn aktif={sekme === "notalar"} onClick={() => sekmeyeGec("notalar")}>Notalar</SekmeBtn>
               <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
             </nav>
             {(hesap.seri?.gun ?? 0) >= 2 && (
@@ -119,6 +121,8 @@ export default function App() {
           <Onerilerim onAnketeDon={anketiAc} />
         ) : sekme === "koleksiyonlar" ? (
           <Koleksiyonlar />
+        ) : sekme === "notalar" ? (
+          <Notalar />
         ) : sekme === "kesfet" ? (
           <Kesfet />
         ) : (
@@ -133,6 +137,9 @@ export default function App() {
           </button>
           <button className={`sekme ${sekme === "koleksiyonlar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("koleksiyonlar")}>
             <span className="ikon">📚</span>Seçkiler
+          </button>
+          <button className={`sekme ${sekme === "notalar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("notalar")}>
+            <span className="ikon">🌿</span>Notalar
           </button>
           <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => sekmeyeGec("kesfet")}>
             <span className="ikon">⌕</span>Keşfet

@@ -122,15 +122,32 @@ export function ara(
     return metinPuani(p, f.metin) >= 0.5;
   });
 
-  const uygunluk = (p: Parfum) =>
-    (profil ? puanla(profil, p) : p.populerlik) + metinPuani(p, f.metin) * 0.5;
-
   switch (f.siralama) {
-    case "uygunluk":
-      sonuc.sort((a, b) => uygunluk(b) - uygunluk(a));
+    case "uygunluk": {
+      // PERFORMANS: 'uygunluk' sıralaması puanla() gerektirir. Bunu doğrudan
+      // sort karşılaştırıcısında çağırmak felakettir (n·log n kez ≈ yüz binlerce
+      // hesap ve ana thread kilidi). Bunun yerine:
+      //  1) Büyük listeyi önce UCUZ bir anahtarla en umut verici ~1500'e indir,
+      //  2) her elemanın uygunluk skorunu TEK KEZ hesapla (decorate),
+      //  3) hesaplanmış skora göre sırala.
+      let havuz = sonuc;
+      if (havuz.length > 1500) {
+        havuz = havuz
+          .map((p) => ({ p, on: p.populerlik + (p.topluluk_puan ?? 0) / 5 + metinPuani(p, f.metin) * 0.5 }))
+          .sort((a, b) => b.on - a.on)
+          .slice(0, 1500)
+          .map((x) => x.p);
+      }
+      const skorlu = havuz.map((p) => ({
+        p,
+        s: (profil ? puanla(profil, p) : p.populerlik) + metinPuani(p, f.metin) * 0.5,
+      }));
+      skorlu.sort((a, b) => b.s - a.s);
+      sonuc = skorlu.map((x) => x.p);
       break;
+    }
     case "populerlik":
-      sonuc.sort((a, b) => b.populerlik - a.populerlik);
+      sonuc.sort((a, b) => (b.topluluk_oy ?? 0) - (a.topluluk_oy ?? 0) || b.populerlik - a.populerlik);
       break;
     case "yenilik":
       sonuc.sort((a, b) => b.yil - a.yil);

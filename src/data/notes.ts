@@ -92,6 +92,10 @@ export const NOTALAR: Nota[] = [
   { id: "muskat", ad: "Muskat", kategori: "baharat", emoji: "🌰" },
   { id: "kisnis", ad: "Kişniş", kategori: "baharat", emoji: "🌿" },
   { id: "nilufer", ad: "Nilüfer", kategori: "cicek", emoji: "🪷" },
+  { id: "kavun", ad: "Kavun", kategori: "meyve", emoji: "🍈" },
+  { id: "sardunya", ad: "Sardunya", kategori: "cicek", emoji: "🌺" },
+  { id: "sakayik", ad: "Şakayık", kategori: "cicek", emoji: "🌸" },
+  { id: "portakal", ad: "Portakal", kategori: "narenciye", emoji: "🍊" },
 ];
 
 export const NOTA_MAP: Record<string, Nota> = Object.fromEntries(

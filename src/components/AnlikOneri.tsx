@@ -8,15 +8,17 @@ import type { Parfum, Cinsiyet } from "../engine/types";
 import { AILE_ETIKET, AILE_RENK, type Aile } from "../engine/types";
 import { useStore } from "../state/store";
 import { useKatalogSurumu } from "../state/useKatalog";
+import { useDil } from "../i18n/DilContext";
 import { SiseGorsel, Modal } from "./ui";
 
 export function AnlikGiris({ onAc }: { onAc: () => void }) {
+  const { t } = useDil();
   return (
     <button className="anlikGiris cam" onClick={onAc}>
       <span className="anlikIkon">🎯</span>
       <span className="anlikMetin">
-        <span className="serif anlikBaslik">Bugün ne var?</span>
-        <span className="minik">Randevu, iş, gece… ana göre hızlı koku + kombin önerisi</span>
+        <span className="serif anlikBaslik">{t("anlik.baslik")}</span>
+        <span className="minik">{t("anlik.girisAlt")}</span>
       </span>
       <span className="anlikOk">→</span>
     </button>
@@ -25,6 +27,7 @@ export function AnlikGiris({ onAc }: { onAc: () => void }) {
 
 export function AnlikModal({ onKapat, onDetay }: { onKapat: () => void; onDetay: (p: Parfum) => void }) {
   const { hesap } = useStore();
+  const { t } = useDil();
   const katalogSurum = useKatalogSurumu();
   const [okazyon, setOkazyon] = useState<Okazyon | null>(null);
   const [secili, setSecili] = useState<Parfum | null>(null);
@@ -43,16 +46,14 @@ export function AnlikModal({ onKapat, onDetay }: { onKapat: () => void; onDetay:
     <Modal onKapat={onKapat} genis>
       {!okazyon ? (
         <div>
-          <span className="ustBaslik">🎯 Anlık Öneri</span>
-          <h2 className="serif" style={{ fontSize: "clamp(24px,4vw,34px)", margin: "6px 0 6px" }}>Bugün ne var?</h2>
-          <p className="minik" style={{ marginBottom: 20 }}>
-            Durumu seç — o ana en uygun kokulara saniyeler içinde ulaş.
-          </p>
+          <span className="ustBaslik">🎯</span>
+          <h2 className="serif" style={{ fontSize: "clamp(24px,4vw,34px)", margin: "6px 0 6px" }}>{t("anlik.baslik")}</h2>
+          <p className="minik" style={{ marginBottom: 20 }}>{t("anlik.durumSec")}</p>
           <div className="okazyonIzgara">
             {OKAZYONLAR.map((o) => (
               <button key={o.id} className="okazyonKart" onClick={() => setOkazyon(o)}>
                 <span className="okazyonEmoji">{o.emoji}</span>
-                <span className="serif okazyonAd">{o.ad}</span>
+                <span className="serif okazyonAd">{t(`okazyon.${o.id}`)}</span>
                 <span className="minik">{o.aciklama}</span>
               </button>
             ))}
@@ -68,11 +69,11 @@ export function AnlikModal({ onKapat, onDetay }: { onKapat: () => void; onDetay:
         />
       ) : (
         <div>
-          <button className="atlaBtn" onClick={() => setOkazyon(null)}>← Durum değiştir</button>
+          <button className="atlaBtn" onClick={() => setOkazyon(null)}>{t("btn.geri")}</button>
           <div className="anlikBas">
             <div>
-              <span className="ustBaslik">{okazyon.emoji} {okazyon.ad}</span>
-              <h2 className="serif" style={{ fontSize: "clamp(22px,3.5vw,30px)", margin: "4px 0 2px" }}>Bu an için seçkin</h2>
+              <span className="ustBaslik">{okazyon.emoji} {t(`okazyon.${okazyon.id}`)}</span>
+              <h2 className="serif" style={{ fontSize: "clamp(22px,3.5vw,30px)", margin: "4px 0 2px" }}>{t("anlik.buAn")}</h2>
               <p className="minik">{okazyon.aciklama}</p>
             </div>
             <div className="cinsSecim">
@@ -82,14 +83,14 @@ export function AnlikModal({ onKapat, onDetay }: { onKapat: () => void; onDetay:
                   className={`cip ${cinsiyet === c ? "secili" : ""}`}
                   onClick={() => setCinsiyet(c)}
                 >
-                  {c === "kadin" ? "Kadın" : c === "erkek" ? "Erkek" : "Hepsi"}
+                  {c === "kadin" ? t("cins.kadin") : c === "erkek" ? t("cins.erkek") : t("cins.hepsi")}
                 </button>
               ))}
             </div>
           </div>
 
           {oneriler.length === 0 ? (
-            <p className="minik" style={{ marginTop: 20 }}>Bu filtreyle sonuç yok — cinsiyeti "Hepsi" yapmayı dene.</p>
+            <p className="minik" style={{ marginTop: 20 }}>—</p>
           ) : (
             <div className="anlikIzgara">
               {oneriler.map((p) => (
@@ -99,7 +100,7 @@ export function AnlikModal({ onKapat, onDetay }: { onKapat: () => void; onDetay:
                   </div>
                   <div className="pMarka">{p.marka}</div>
                   <div className="serif anlikKartAd">{p.ad}</div>
-                  <span className="kombinEtiket">👔 Kombin öner</span>
+                  <span className="kombinEtiket">{t("anlik.kombinOner")}</span>
                 </button>
               ))}
             </div>
@@ -116,16 +117,17 @@ function KombinGorunum({
   parfum: Parfum; okazyon: Okazyon; cinsiyet: Cinsiyet | "fark_etmez";
   onGeri: () => void; onDetay: () => void;
 }) {
+  const { t } = useDil();
   const kombin = useMemo(() => kombinOner(parfum, okazyon, cinsiyet), [parfum, okazyon, cinsiyet]);
   const anaAile = (Object.entries(parfum.aileler).sort((a, b) => (b[1] as number) - (a[1] as number))[0]?.[0] ?? "amber") as Aile;
 
   return (
     <div>
-      <button className="atlaBtn" onClick={onGeri}>← Listeye dön</button>
+      <button className="atlaBtn" onClick={onGeri}>{t("btn.geri")}</button>
       <div className="kombinVitrin" style={{ ["--sahne" as string]: AILE_RENK[anaAile] }}>
         <div className="kombinSise"><SiseGorsel parfum={parfum} buyuk /></div>
         <div>
-          <span className="ustBaslik">{okazyon.emoji} {okazyon.ad} · kombin</span>
+          <span className="ustBaslik">{okazyon.emoji} {t(`okazyon.${okazyon.id}`)}</span>
           <div className="pMarka" style={{ marginTop: 8 }}>{parfum.marka}</div>
           <h2 className="serif" style={{ fontSize: "clamp(24px,4vw,32px)" }}>{parfum.ad}</h2>
           <div className="etiketSira" style={{ marginTop: 8 }}>
@@ -135,19 +137,19 @@ function KombinGorunum({
       </div>
 
       <div className="kombinKutu">
-        <h4>👗 Kombin Önerisi</h4>
+        <h4>{t("anlik.kombinBaslik")}</h4>
         <ul className="kombinListe">
           {kombin.parcalar.map((p, i) => <li key={i}>{p}</li>)}
         </ul>
         <div className="kombinPalet">
-          <span className="kombinPaletBaslik">🎨 Renk & doku</span>
+          <span className="kombinPaletBaslik">{t("anlik.renkDoku")}</span>
           <span>{kombin.palet}</span>
         </div>
         <p className="kombinIpucu">💡 {kombin.ipucu}</p>
       </div>
 
       <button className="btn btnAna" style={{ marginTop: 18 }} onClick={onDetay}>
-        Parfümün tüm detayı →
+        {t("anlik.tumDetay")}
       </button>
     </div>
   );

@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "./state/store";
 import { Aurora } from "./components/ui";
 import { sayfaGecisi } from "./components/gecis";
+import { useDil } from "./i18n/DilContext";
+import { DILLER, type Dil } from "./i18n/diller";
 import { tamKatalogYukle } from "./data/catalog";
 import { Karsilama } from "./screens/Karsilama";
 import { Anket } from "./screens/Anket";
@@ -26,6 +28,7 @@ function baslangicTema(): Tema {
 
 export default function App() {
   const { hesap } = useStore();
+  const { t } = useDil();
   const [anketAcik, setAnketAcik] = useState(false);
   const [sekme, setSekme] = useState<Sekme>("onerilerim");
   const [tema, setTema] = useState<Tema>(baslangicTema);
@@ -69,7 +72,12 @@ export default function App() {
   return (
     <>
       <Aurora />
-      {!girisliVeAnketli && <TemaBtn tema={tema} onDegis={temaDegis} serbest />}
+      {!girisliVeAnketli && (
+        <div className="serbestUst">
+          <DilSecici />
+          <TemaBtn tema={tema} onDegis={temaDegis} serbest />
+        </div>
+      )}
       {girisliVeAnketli && (
         <header className="ustCubuk">
           <div className="ustCubukIc">
@@ -82,11 +90,12 @@ export default function App() {
               Frag <em>Tasting</em>
             </button>
             <nav className="sekmeler">
-              <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>Senin Seçkin</SekmeBtn>
-              <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>Koleksiyonlar</SekmeBtn>
-              <SekmeBtn aktif={sekme === "notalar"} onClick={() => sekmeyeGec("notalar")}>Notalar</SekmeBtn>
-              <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>Keşfet</SekmeBtn>
+              <SekmeBtn aktif={sekme === "onerilerim"} onClick={() => sekmeyeGec("onerilerim")}>{t("nav.oneriler")}</SekmeBtn>
+              <SekmeBtn aktif={sekme === "koleksiyonlar"} onClick={() => sekmeyeGec("koleksiyonlar")}>{t("nav.koleksiyonlar")}</SekmeBtn>
+              <SekmeBtn aktif={sekme === "notalar"} onClick={() => sekmeyeGec("notalar")}>{t("nav.notalar")}</SekmeBtn>
+              <SekmeBtn aktif={sekme === "kesfet"} onClick={() => sekmeyeGec("kesfet")}>{t("nav.kesfet")}</SekmeBtn>
             </nav>
+            <DilSecici />
             {(hesap.seri?.gun ?? 0) >= 2 && (
               <button className="seriRozet" onClick={() => sekmeyeGec("profil")} title={`${hesap.seri!.gun} günlük seri`}>
                 🔥 {hesap.seri!.gun}
@@ -133,19 +142,19 @@ export default function App() {
       {girisliVeAnketli && (
         <nav className="altBar">
           <button className={`sekme ${sekme === "onerilerim" ? "aktif" : ""}`} onClick={() => sekmeyeGec("onerilerim")}>
-            <span className="ikon">✦</span>Seçkin
+            <span className="ikon">✦</span>{t("nav.oneriler")}
           </button>
           <button className={`sekme ${sekme === "koleksiyonlar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("koleksiyonlar")}>
-            <span className="ikon">📚</span>Seçkiler
+            <span className="ikon">📚</span>{t("nav.koleksiyonlar")}
           </button>
           <button className={`sekme ${sekme === "notalar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("notalar")}>
-            <span className="ikon">🌿</span>Notalar
+            <span className="ikon">🌿</span>{t("nav.notalar")}
           </button>
           <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => sekmeyeGec("kesfet")}>
-            <span className="ikon">⌕</span>Keşfet
+            <span className="ikon">⌕</span>{t("nav.kesfet")}
           </button>
           <button className={`sekme ${sekme === "profil" ? "aktif" : ""}`} onClick={() => sekmeyeGec("profil")}>
-            <span className="ikon">♡</span>Profil
+            <span className="ikon">♡</span>{t("nav.profil")}
           </button>
         </nav>
       )}
@@ -158,6 +167,43 @@ function SekmeBtn({ aktif, onClick, children }: { aktif: boolean; onClick: () =>
     <button className={`sekme ${aktif ? "aktif" : ""}`} onClick={onClick}>
       {children}
     </button>
+  );
+}
+
+// Dil seçici — bayrak düğmesi + açılır liste. 10 dil, RTL destekli.
+function DilSecici() {
+  const { dil, setDil } = useDil();
+  const [acik, setAcik] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const mevcut = DILLER.find((d) => d.kod === dil) ?? DILLER[0];
+
+  useEffect(() => {
+    if (!acik) return;
+    const disari = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setAcik(false); };
+    window.addEventListener("mousedown", disari);
+    return () => window.removeEventListener("mousedown", disari);
+  }, [acik]);
+
+  return (
+    <div className="dilSecici" ref={ref}>
+      <button className="dilBtn" onClick={() => setAcik((a) => !a)} title={mevcut.ad} aria-label="Dil / Language">
+        <span className="dilBayrak">{mevcut.bayrak}</span>
+        <span className="dilKod">{mevcut.kod.toUpperCase()}</span>
+      </button>
+      {acik && (
+        <div className="dilListe">
+          {DILLER.map((d) => (
+            <button
+              key={d.kod}
+              className={`dilOge ${d.kod === dil ? "aktif" : ""}`}
+              onClick={() => { setDil(d.kod as Dil); setAcik(false); }}
+            >
+              <span className="dilBayrak">{d.bayrak}</span> {d.ad}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

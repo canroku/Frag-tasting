@@ -664,6 +664,43 @@ h1, h2, h3, .serif {
 .avatar.aktif { border-color: var(--cream); box-shadow: 0 0 0 3px var(--accent-soft); }
 @media (max-width: 720px) { .avatar { margin-left: auto; } }
 
+/* ---------- Dil seçici ---------- */
+.dilSecici { position: relative; flex-shrink: 0; }
+.dilBtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 12px; border-radius: 999px;
+  border: 1px solid var(--hairline); background: var(--surface);
+  font-size: 13px; font-weight: 600; color: var(--cream-60);
+  transition: all 200ms var(--ease);
+}
+.dilBtn:hover { border-color: var(--cream-60); color: var(--cream); }
+.dilBayrak { font-size: 15px; }
+.dilKod { letter-spacing: 0.04em; }
+.dilListe {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 80;
+  min-width: 168px; padding: 6px;
+  background: var(--bg-2); border: 1px solid var(--hairline); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 2px;
+  max-height: 60vh; overflow-y: auto;
+}
+[dir="rtl"] .dilListe { right: auto; left: 0; }
+.dilOge {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 14px; text-align: left; color: var(--cream);
+  transition: background 160ms;
+}
+.dilOge:hover { background: var(--surface-2); }
+.dilOge.aktif { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+.serbestUst {
+  position: fixed; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 60;
+  display: flex; align-items: center; gap: 8px;
+}
+.serbestUst .temaBtnSerbest { position: static; }
+[dir="rtl"] .serbestUst { right: auto; left: 16px; }
+
 /* ---------- Tema (gece/sabah) düğmesi ---------- */
 .temaBtn {
   width: 38px; height: 38px; border-radius: 50%;

@@ -180,6 +180,8 @@ input, select { font-family: inherit; }
   padding: 0 clamp(18px, 4vw, 40px) 120px;
   flex: 1;
 }
+/* Ajans hero tam ekran taştığından, onu saran .kabuk'un alt boşluğu kapatılır */
+.kabuk:has(.ajansHero) { padding-bottom: 0; }
 
 .girisAnim { animation: yukari var(--dur) var(--ease) both; }
 @keyframes yukari {
@@ -243,44 +245,146 @@ h1, h2, h3, .serif {
 .btnCizgi:hover { border-color: var(--cream-60); background: var(--surface); }
 .btnKucuk { padding: 9px 18px; font-size: 13px; }
 
-/* ---------- Karşılama ---------- */
-.karsilama {
-  min-height: calc(100dvh - 60px);
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 60px 0;
+/* ---------- Karşılama — koyu "ajans stüdyo" hero ----------
+   Bu ekran kasıtlı olarak uygulamanın gündüz/gece temasından bağımsızdır:
+   sabit koyu lacivert-siyah zemin + tek vurgu rengi sarı, sinematik bir
+   giriş kapısı gibi davranır. App.tsx, hesap yokken temayı "koyu"ya sabitler. */
+.ajansHero {
+  /* .kabuk üst kapsayıcısının max-width'inden taşıp tam ekran genişliğine yayılır */
+  width: 100vw;
   position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  color: #fff;
 }
-.karsilama h1 {
-  font-size: clamp(46px, 8.5vw, 104px);
-  line-height: 1.02;
-  margin: 22px 0 26px;
-  max-width: 11ch;
-}
-.karsilama h1 .vurgu {
-  font-style: italic;
-  background: linear-gradient(100deg, var(--rose) 0%, var(--accent) 60%, var(--amber-bright) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.karsilama p.alt {
-  color: var(--cream-60);
-  font-size: clamp(16px, 2vw, 19px);
-  max-width: 46ch;
-  margin-bottom: 40px;
-}
-.karsilamaSatir { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 
-.sisePlaka {
-  position: absolute; right: clamp(-40px, 2vw, 60px); top: 50%;
-  transform: translateY(-50%);
-  font-size: clamp(120px, 22vw, 260px);
-  opacity: 0.14;
-  filter: blur(0.5px) drop-shadow(0 30px 60px rgba(217, 155, 106, 0.35));
-  pointer-events: none;
-  animation: yuzer 7s ease-in-out infinite alternate;
+/* Arka plan katmanı: derin lacivert zemin + sağ üstten godray + ASCII doku */
+.ajansZemin {
+  position: fixed; inset: 0; z-index: -10; pointer-events: none;
+  overflow: hidden;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-family='monospace' font-size='19' fill='%23ffffff' fill-opacity='0.05'%3E%7C%3C/text%3E%3C/svg%3E"),
+    radial-gradient(120% 95% at 83% 20%, #0a1c46 0%, #030d2b 45%, #010f14 78%, #010509 100%);
+  background-repeat: repeat, no-repeat;
+  background-size: 30px 30px, auto;
 }
-@keyframes yuzer { from { transform: translateY(-52%) rotate(-3deg); } to { transform: translateY(-46%) rotate(3deg); } }
+/* Yumuşak godray huzmesi — üst üste binen bulanık radial-gradient'ler,
+   ince tekrarlı desenler yerine (moiré riski olmadan) sağ üstten sızan
+   sıcak ışık hissi verir. */
+.ajansZemin::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(32% 55% at 92% 0%, rgba(252, 254, 255, 0.4), transparent 70%),
+    radial-gradient(24% 42% at 76% 6%, rgba(252, 254, 255, 0.2), transparent 72%),
+    radial-gradient(46% 68% at 98% 16%, rgba(181, 147, 24, 0.28), transparent 75%);
+  mix-blend-mode: screen;
+  filter: blur(8px);
+}
+.ajansZemin::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(38, 0, 255, 0.16), transparent 45%, rgba(255, 238, 3, 0.07));
+  mix-blend-mode: overlay;
+}
+@media (max-width: 720px) {
+  /* Mobilde tam ekran SVG doku tekrar boyaması pahalı — sadeleştir */
+  .ajansZemin {
+    background-image: radial-gradient(140% 90% at 85% 16%, #0a1c46 0%, #030d2b 50%, #010f14 82%, #010509 100%);
+  }
+}
+
+/* Fare imleç izi — yalnızca hassas işaretçili masaüstünde */
+.imlecIzi { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+.imlecNokta {
+  position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+  border-radius: 50%; background: #ffee03;
+  box-shadow: 0 0 12px 3px rgba(255, 238, 3, 0.45);
+  transition: opacity 220ms linear;
+}
+
+/* Üst navigasyon — sol üstte minimal, alt alta dizili */
+.ajansNav {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 40px) 0;
+}
+.ajansNavOge {
+  align-self: flex-start;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 200ms var(--ease);
+}
+.ajansNavOge:hover { color: #fff; }
+.ajansNavAktif { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Ana gövde — dev tipografi ortada */
+.ajansGovde {
+  position: relative; z-index: 2;
+  flex: 1;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 24px clamp(20px, 4vw, 40px);
+}
+.ajansBaslik {
+  font-family: "Space Grotesk", var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.75rem, 11vw, 9rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  display: flex; flex-direction: column;
+}
+.ajansSatir { display: block; }
+.ajansSatir.ajansVurgu {
+  font-family: "Nabla", "Space Grotesk", sans-serif;
+  font-weight: 400;
+  color: #ffee03;
+}
+
+.ajansAlt {
+  margin-top: clamp(20px, 4vw, 40px);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  flex-wrap: wrap;
+}
+.ajansAciklama {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: clamp(15px, 1.6vw, 17px);
+  max-width: 28rem;
+  line-height: 1.5;
+}
+.ajansCtaGrup { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.ajansCta {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 15px 26px; border-radius: 999px;
+  font-size: 15px; font-weight: 600; color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transition: background 300ms var(--ease), color 300ms var(--ease), transform 300ms var(--ease);
+}
+.ajansCta:hover { background: #fff; color: #030d2b; transform: translateY(-2px); }
+.ajansCtaOk { transition: transform 300ms var(--ease); }
+.ajansCta:hover .ajansCtaOk { transform: translateX(5px); }
+.ajansSure { color: rgba(255, 255, 255, 0.4); }
+
+/* Alt bilgi çubuğu */
+.ajansFooter {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px clamp(20px, 4vw, 40px);
+  background: #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.ajansLogo { font-family: var(--font-serif); font-size: 15px; color: #fff; }
+.ajansLogo em { font-style: italic; color: #ffee03; }
+.ajansFooterMetin { color: rgba(255, 255, 255, 0.4); }
+
+@media (max-width: 720px) {
+  .ajansAlt { flex-direction: column; align-items: flex-start; }
+  .ajansFooterMetin { display: none; }
+}
 
 /* koku partikülleri */
 .partikuller { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }

@@ -33,9 +33,9 @@ const S: Record<string, Satir> = {
 
   // Karşılama
   "karsilama.ust": ["Kişisel Koku Danışmanın", "Your Personal Scent Advisor", "Dein persönlicher Duftberater", "Ton conseiller parfum personnel", "Tu asesor de fragancias personal", "Il tuo consulente di profumi", "Твой личный парфюмерный советник", "مستشار العطور الشخصي", "Seu consultor de fragrâncias", "你的私人香氛顾问"],
-  "karsilama.baslik1": ["Sana özel", "Let's find", "Finden wir", "Trouvons", "Encontremos", "Troviamo", "Найдём твой", "لنجد", "Vamos encontrar", "找到属于你的"],
-  "karsilama.baslikVurgu": ["kokunu", "your scent", "deinen Duft", "ton parfum", "tu aroma", "il tuo profumo", "аромат", "عطرك", "seu perfume", "香气"],
-  "karsilama.baslik2": ["bulalım", "", "", "", "", "", "", "", "", ""],
+  "karsilama.satir1": ["Kendi", "Discover", "Entdecke", "Découvre", "Descubre", "Scopri", "Найди", "اكتشف", "Descubra", "发现"],
+  "karsilama.satir2": ["Kokunu", "Your Own", "Deinen Eigenen", "Ton Propre", "Tu Propio", "Il Tuo", "Свой", "عطرك", "Seu Próprio", "专属于你的"],
+  "karsilama.satir3": ["Keşfet", "Scent", "Duft", "Parfum", "Aroma", "Profumo", "Аромат", "الخاص", "Aroma", "香气"],
   "karsilama.alt": [
     "Yaşını, karakterini ve koku zevkini anlayan kişisel bir koku danışmanı. Kısa bir tadım anketi — sana en yakın 10–15 parfüm, nedenleriyle birlikte.",
     "A personal advisor that understands your age, character and scent taste. A short tasting survey — your closest 10–15 perfumes, with reasons.",
@@ -48,7 +48,7 @@ const S: Record<string, Satir> = {
     "Um consultor pessoal que entende sua idade, caráter e gosto olfativo. Uma pesquisa curta — seus 10–15 perfumes mais próximos, com motivos.",
     "懂你年龄、性格与香氛品味的私人顾问。简短测试——为你精选最契合的 10–15 款香水，并附推荐理由。",
   ],
-  "karsilama.baslaCta": ["Tadıma Başla ✦", "Start Tasting ✦", "Tasting starten ✦", "Commencer ✦", "Empezar ✦", "Inizia ✦", "Начать ✦", "ابدأ ✦", "Começar ✦", "开始品鉴 ✦"],
+  "karsilama.baslaCta": ["Tadıma Başla", "Start Tasting", "Tasting starten", "Commencer", "Empezar", "Inizia", "Начать", "ابدأ", "Começar", "开始品鉴"],
   "karsilama.sure": ["≈ 2 dakika sürer · ücretsiz", "≈ 2 minutes · free", "≈ 2 Minuten · kostenlos", "≈ 2 minutes · gratuit", "≈ 2 minutos · gratis", "≈ 2 minuti · gratis", "≈ 2 минуты · бесплатно", "≈ دقيقتان · مجاني", "≈ 2 minutos · grátis", "≈ 2 分钟 · 免费"],
 
   // Ortak butonlar

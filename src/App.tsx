@@ -39,12 +39,15 @@ export default function App() {
     tamKatalogYukle();
   }, []);
 
-  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır
+  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır.
+  // Girişsiz karşılama ekranı (ajans hero) kasıtlı olarak hep koyudur —
+  // gündüz/gece tercihi yalnızca hesap açıldıktan sonra geçerli olur.
+  const temaEfektif = hesap ? tema : "koyu";
   useEffect(() => {
-    document.documentElement.dataset.tema = tema;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "aydinlik" ? "#f7f1e8" : "#14060f");
+    document.documentElement.dataset.tema = temaEfektif;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", temaEfektif === "aydinlik" ? "#f7f1e8" : "#14060f");
     localStorage.setItem("frag_tema", tema);
-  }, [tema]);
+  }, [tema, temaEfektif]);
 
   const temaDegis = () => sayfaGecisi(() => setTema((t) => (t === "koyu" ? "aydinlik" : "koyu")), "sekme");
 
@@ -71,11 +74,11 @@ export default function App() {
 
   return (
     <>
-      <Aurora />
+      {hesap && <Aurora />}
       {!girisliVeAnketli && (
         <div className="serbestUst">
           <DilSecici />
-          <TemaBtn tema={tema} onDegis={temaDegis} serbest />
+          {hesap && <TemaBtn tema={tema} onDegis={temaDegis} serbest />}
         </div>
       )}
       {girisliVeAnketli && (

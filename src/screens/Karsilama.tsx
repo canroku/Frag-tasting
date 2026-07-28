@@ -1,36 +1,100 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { useDil } from "../i18n/DilContext";
-import { Partikuller } from "../components/ui";
 
 export function Karsilama({ onDevam }: { onDevam: () => void }) {
   const { t } = useDil();
-  const [authAcik, setAuthAcik] = useState(false);
-  if (authAcik) return <AuthEkrani onGeri={() => setAuthAcik(false)} onBasari={onDevam} />;
+  const [authAcik, setAuthAcik] = useState<false | "kayit" | "giris">(false);
+  if (authAcik) return <AuthEkrani ilkMod={authAcik} onGeri={() => setAuthAcik(false)} onBasari={onDevam} />;
 
   return (
-    <div className="karsilama girisAnim">
-      <Partikuller adet={22} />
-      <div className="sisePlaka" aria-hidden>⚗️</div>
-      <span className="ustBaslik">Frag Tasting · {t("karsilama.ust")}</span>
-      <h1>
-        {t("karsilama.baslik1")} <span className="vurgu">{t("karsilama.baslikVurgu")}</span> {t("karsilama.baslik2")}
-      </h1>
-      <p className="alt">{t("karsilama.alt")}</p>
-      <div className="karsilamaSatir">
-        <button className="btn btnAna" onClick={() => setAuthAcik(true)}>
-          {t("karsilama.baslaCta")}
+    <div className="ajansHero girisAnim">
+      <div className="ajansZemin" aria-hidden />
+      <ImlecIzi />
+
+      <nav className="ajansNav">
+        <span className="ajansNavOge">{t("kesfet.baslik")}</span>
+        <span className="ajansNavOge">{t("notalar.baslik")}</span>
+        <button className="ajansNavOge ajansNavAktif" onClick={() => setAuthAcik("giris")}>
+          {t("auth.giris")} ↗
         </button>
-        <span className="minik">{t("karsilama.sure")}</span>
+      </nav>
+
+      <div className="ajansGovde">
+        <h1 className="ajansBaslik">
+          <span className="ajansSatir">{t("karsilama.satir1")}</span>
+          <span className="ajansSatir">{t("karsilama.satir2")}</span>
+          <span className="ajansSatir ajansVurgu">{t("karsilama.satir3")}</span>
+        </h1>
+        <div className="ajansAlt">
+          <p className="ajansAciklama">{t("karsilama.alt")}</p>
+          <div className="ajansCtaGrup">
+            <button className="ajansCta" onClick={() => setAuthAcik("kayit")}>
+              <span>{t("karsilama.baslaCta")}</span>
+              <span className="ajansCtaOk">→</span>
+            </button>
+            <span className="ajansSure minik">{t("karsilama.sure")}</span>
+          </div>
+        </div>
       </div>
+
+      <footer className="ajansFooter">
+        <span className="ajansLogo">⚗️ Frag <em>Tasting</em></span>
+        <span className="ajansFooterMetin minik">{t("karsilama.ust")}</span>
+      </footer>
     </div>
   );
 }
 
-function AuthEkrani({ onGeri, onBasari }: { onGeri: () => void; onBasari: () => void }) {
+// Fareyi izleyen, kısa süre sonra sönümlenen sarı iz noktaları.
+// Yalnızca hassas işaretçili (masaüstü) cihazlarda ve hareket azaltma
+// kapalıyken çalışır — dokunmatik/erişilebilirlik maliyeti yok.
+function ImlecIzi() {
+  const [noktalar, setNoktalar] = useState<{ x: number; y: number; id: number }[]>([]);
+  const sayac = useRef(0);
+  const sonZaman = useRef(0);
+
+  useEffect(() => {
+    const hassas = window.matchMedia("(pointer: fine)").matches;
+    const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!hassas || azHareket) return;
+
+    function hareket(e: MouseEvent) {
+      const simdi = performance.now();
+      if (simdi - sonZaman.current < 35) return;
+      sonZaman.current = simdi;
+      const id = sayac.current++;
+      setNoktalar((n) => [...n.slice(-11), { x: e.clientX, y: e.clientY, id }]);
+    }
+    window.addEventListener("mousemove", hareket);
+    return () => window.removeEventListener("mousemove", hareket);
+  }, []);
+
+  useEffect(() => {
+    if (!noktalar.length) return;
+    const zaman = setTimeout(() => setNoktalar((n) => n.slice(1)), 250);
+    return () => clearTimeout(zaman);
+  }, [noktalar]);
+
+  return (
+    <div className="imlecIzi" aria-hidden>
+      {noktalar.map((n, i) => (
+        <span
+          key={n.id}
+          className="imlecNokta"
+          style={{ left: n.x, top: n.y, opacity: ((i + 1) / noktalar.length) * 0.8 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function AuthEkrani({
+  ilkMod, onGeri, onBasari,
+}: { ilkMod: "kayit" | "giris"; onGeri: () => void; onBasari: () => void }) {
   const { kayitOl, girisYap } = useStore();
   const { t } = useDil();
-  const [mod, setMod] = useState<"kayit" | "giris">("kayit");
+  const [mod, setMod] = useState<"kayit" | "giris">(ilkMod);
   const [ad, setAd] = useState("");
   const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
@@ -52,7 +116,7 @@ function AuthEkrani({ onGeri, onBasari }: { onGeri: () => void; onBasari: () => 
     <div className="girisAnim">
       <form className="authKutu cam" onSubmit={gonder}>
         <span className="ustBaslik">{mod === "kayit" ? t("auth.hesapOlustur") : t("auth.giris")}</span>
-        <h2>{mod === "kayit" ? t("karsilama.baslik1") + " " + t("karsilama.baslikVurgu") : t("nav.anaEkran")}</h2>
+        <h2>{mod === "kayit" ? t("karsilama.satir2") + " " + t("karsilama.satir3") : t("nav.anaEkran")}</h2>
 
         {mod === "kayit" && (
           <div className="alanGrup">

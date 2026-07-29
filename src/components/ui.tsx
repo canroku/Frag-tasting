@@ -5,7 +5,7 @@ import type { Parfum, Oneri, Aile, Cinsiyet } from "../engine/types";
 import { AILE_ETIKET, AILE_RENK, fragranticaLink } from "../engine/types";
 import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
 import { KATALOG } from "../data/catalog";
-import { bunaBenzer, muadilBul } from "../engine/recommend";
+import { bunaBenzer, muadilBul, muadilVarMi } from "../engine/recommend";
 import { toplulukVerisi, oyFormat } from "../engine/topluluk";
 import { gorselKaynak } from "../data/gorsel";
 import { useStore } from "../state/store";
@@ -284,6 +284,8 @@ export function ParfumKart({
   const favori = hesap?.favoriler.includes(parfum.id) ?? false;
   const tepki = hesap?.geriBildirim[parfum.id];
   const topluluk = useMemo(() => toplulukVerisi(parfum), [parfum]);
+  const katalogSurum = useKatalogSurumu();
+  const muadilVar = useMemo(() => muadilVarMi(parfum, KATALOG), [parfum, katalogSurum]);
   const aileler = Object.entries(parfum.aileler)
     .sort((a, b) => (b[1] as number) - (a[1] as number))
     .slice(0, 2);
@@ -322,6 +324,15 @@ export function ParfumKart({
         {aileler.map(([a]) => (
           <span key={a} className="etiket">{AILE_ETIKET[a as Aile]}</span>
         ))}
+        {muadilVar && (
+          <button
+            className="etiket muadilRozet"
+            onClick={(e) => { e.stopPropagation(); onDetay(parfum); }}
+            title="Koku olarak yakın, daha uygun fiyatlı bir alternatifi var"
+          >
+            💸 Muadili var
+          </button>
+        )}
       </div>
 
       {oneri && oneri.neden.length > 0 && (

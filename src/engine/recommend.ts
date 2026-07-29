@@ -248,3 +248,16 @@ export function muadilBul(kaynak: Parfum, katalog: Parfum[], n = 5): { parfum: P
     .sort((a, b) => b.benzerlik - a.benzerlik)
     .slice(0, n);
 }
+
+// Kart rozetinde tam listeyi kurup sıralamadan yalnızca "uygun muadili var mı?"
+// sorusuna cevap verir — ilk eşleşmede durur, muadilBul'dan çok daha ucuz.
+export function muadilVarMi(kaynak: Parfum, katalog: Parfum[]): boolean {
+  const kaynakFiyat = FIYAT_DEGER[kaynak.fiyat_seviyesi];
+  if (kaynakFiyat === 0) return false; // zaten en ucuz kademede, daha ucuzu yok
+  return katalog.some(
+    (p) =>
+      p.id !== kaynak.id &&
+      FIYAT_DEGER[p.fiyat_seviyesi] < kaynakFiyat &&
+      parfumBenzerlik(kaynak, p) >= 0.45
+  );
+}

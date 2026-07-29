@@ -557,6 +557,8 @@ h1, h2, h3, .serif {
   background: var(--accent-soft); color: var(--accent);
 }
 .etiket.notr { background: var(--surface-2); color: var(--cream-60); }
+.muadilRozet { transition: transform 160ms var(--ease), background 160ms var(--ease); }
+.muadilRozet:hover { background: var(--accent); color: var(--bg); transform: translateY(-1px); }
 
 .pKartAlt { display: flex; gap: 8px; margin-top: auto; align-items: center; flex-wrap: wrap; }
 

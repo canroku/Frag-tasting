@@ -1,27 +1,28 @@
 /* ============================================================
-   FRAG TASTING — 2026 Collection tasarım sistemi
-   Doküman paleti (aubergine, gül kurusu, amber-altın, krem, yeşil)
-   koyu "boutique noir" zeminde yeniden yorumlandı.
+   FRAG TASTING — "Boutique Noir" tasarım sistemi
+   Siyah zemin üzerinde kan kırmızısı (blood/ember) tek vurgu rengi.
+   OKLCH renk uzayı kullanılır; koyu (varsayılan) ve aydınlık iki mod.
    ============================================================ */
 
 :root {
-  --bg: #120510;
-  --bg-2: #1d0a19;
-  --surface: rgba(251, 247, 241, 0.045);
-  --surface-2: rgba(251, 247, 241, 0.08);
-  --hairline: rgba(251, 247, 241, 0.12);
-  --cream: #fbf7f1;
-  --cream-60: rgba(251, 247, 241, 0.62);
-  --cream-40: rgba(251, 247, 241, 0.4);
-  --aubergine: #4a1f42;
-  --rose: #d98ca6;
-  --rose-deep: #a8536f;
-  --amber: #d99b6a;
-  --amber-bright: #eebd8f;
+  --bg: oklch(0.14 0.02 18);
+  --bg-2: oklch(0.18 0.03 18);
+  --surface: oklch(1 0 0 / 6%);
+  --surface-2: oklch(1 0 0 / 9%);
+  --hairline: oklch(1 0 0 / 10%);
+  --cream: oklch(0.94 0.01 40);
+  --cream-60: oklch(0.94 0.01 40 / 64%);
+  --cream-40: oklch(0.94 0.01 40 / 42%);
+  --blood: oklch(0.5 0.21 25);
+  --ember: oklch(0.65 0.19 40);
+  --rose: var(--ember);
+  --rose-deep: var(--blood);
+  --amber: var(--ember);
+  --amber-bright: oklch(0.72 0.15 45);
   --green: #5b9b7a;
-  --accent: var(--amber);
-  --accent-soft: rgba(217, 155, 106, 0.16);
-  --danger: #d96a6a;
+  --accent: var(--blood);
+  --accent-soft: oklch(0.5 0.21 25 / 16%);
+  --danger: oklch(0.55 0.22 25);
   --radius: 22px;
   --radius-sm: 14px;
   --font-serif: "Fraunces", "Times New Roman", serif;
@@ -32,36 +33,39 @@
 }
 
 /* ---------- Sabah (aydınlık) modu ---------- */
-/* Butik krem zeminde aubergine mürekkep; aynı sıcak palet, gündüz hâli. */
+/* Sıcak fildişi zeminde koyu kırmızı-siyah mürekkep; aynı kan kırmızısı vurgu. */
 :root[data-tema="aydinlik"] {
-  --bg: #f7f1e8;
-  --bg-2: #efe5d7;
-  --surface: rgba(74, 31, 66, 0.045);
-  --surface-2: rgba(74, 31, 66, 0.085);
-  --hairline: rgba(74, 31, 66, 0.16);
-  --cream: #2c1226;          /* metin: koyu aubergine mürekkep */
-  --cream-60: rgba(44, 18, 38, 0.66);
-  --cream-40: rgba(44, 18, 38, 0.44);
-  --rose-deep: #a8536f;
-  --amber: #b9702f;          /* açık zeminde okunur derin amber */
-  --amber-bright: #a85f28;
+  --bg: oklch(0.97 0.008 60);
+  --bg-2: oklch(0.93 0.02 40);
+  --surface: oklch(0.2 0.05 22 / 4.5%);
+  --surface-2: oklch(0.2 0.05 22 / 8.5%);
+  --hairline: oklch(0.2 0.05 22 / 16%);
+  --cream: oklch(0.2 0.05 22);          /* metin: koyu kırmızı-siyah mürekkep */
+  --cream-60: oklch(0.2 0.05 22 / 66%);
+  --cream-40: oklch(0.2 0.05 22 / 44%);
+  --blood: oklch(0.48 0.22 24);
+  --ember: oklch(0.58 0.18 42);
+  --rose-deep: var(--blood);
+  --amber: var(--ember);          /* açık zeminde okunur derin ember */
+  --amber-bright: oklch(0.5 0.2 32);
   --green: #3f7d5e;
-  --accent: var(--amber);
-  --accent-soft: rgba(185, 112, 47, 0.14);
-  --shadow: 0 18px 44px -20px rgba(74, 31, 66, 0.35);
+  --accent: var(--blood);
+  --accent-soft: oklch(0.48 0.22 24 / 14%);
+  --shadow: 0 18px 44px -20px oklch(0.2 0.05 22 / 35%);
   color-scheme: light;
 }
 
-/* Mevsime göre değişen vurgu tonu (Bölüm 10 "küçük dokunuşlar") */
-:root[data-sezon="yaz"] { --accent: #8fc7a8; --accent-soft: rgba(143, 199, 168, 0.14); }
-:root[data-sezon="ilkbahar"] { --accent: var(--rose); --accent-soft: rgba(217, 140, 166, 0.14); }
-:root[data-sezon="sonbahar"] { --accent: #d98a5b; --accent-soft: rgba(217, 138, 91, 0.15); }
-:root[data-sezon="kis"] { --accent: var(--amber); --accent-soft: rgba(217, 155, 106, 0.16); }
+/* Mevsime göre değişen vurgu tonu (Bölüm 10 "küçük dokunuşlar") — hepsi
+   kan kırmızısı ailesinde ince ton kaymaları, marka kimliğini bozmaz. */
+:root[data-sezon="yaz"] { --accent: oklch(0.6 0.16 45); --accent-soft: oklch(0.6 0.16 45 / 14%); }
+:root[data-sezon="ilkbahar"] { --accent: oklch(0.55 0.18 15); --accent-soft: oklch(0.55 0.18 15 / 14%); }
+:root[data-sezon="sonbahar"] { --accent: oklch(0.52 0.19 35); --accent-soft: oklch(0.52 0.19 35 / 15%); }
+:root[data-sezon="kis"] { --accent: var(--blood); --accent-soft: oklch(0.5 0.21 25 / 16%); }
 /* Aydınlık modda mevsim vurgusu okunurluk için derinleştirilir */
-:root[data-tema="aydinlik"][data-sezon="yaz"] { --accent: #3f8f6a; --accent-soft: rgba(63, 143, 106, 0.13); }
-:root[data-tema="aydinlik"][data-sezon="ilkbahar"] { --accent: #b04d70; --accent-soft: rgba(176, 77, 112, 0.12); }
-:root[data-tema="aydinlik"][data-sezon="sonbahar"] { --accent: #b26a34; --accent-soft: rgba(178, 106, 52, 0.14); }
-:root[data-tema="aydinlik"][data-sezon="kis"] { --accent: #b9702f; --accent-soft: rgba(185, 112, 47, 0.14); }
+:root[data-tema="aydinlik"][data-sezon="yaz"] { --accent: oklch(0.5 0.17 45); --accent-soft: oklch(0.5 0.17 45 / 13%); }
+:root[data-tema="aydinlik"][data-sezon="ilkbahar"] { --accent: oklch(0.48 0.19 15); --accent-soft: oklch(0.48 0.19 15 / 12%); }
+:root[data-tema="aydinlik"][data-sezon="sonbahar"] { --accent: oklch(0.46 0.2 35); --accent-soft: oklch(0.46 0.2 35 / 14%); }
+:root[data-tema="aydinlik"][data-sezon="kis"] { --accent: var(--blood); --accent-soft: oklch(0.48 0.22 24 / 14%); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { color-scheme: dark; }
@@ -92,8 +96,8 @@ input, select { font-family: inherit; }
   z-index: -2;
   overflow: hidden;
   background:
-    radial-gradient(60% 50% at 85% -10%, rgba(74, 31, 66, 0.9), transparent 70%),
-    radial-gradient(45% 40% at -10% 20%, rgba(168, 83, 111, 0.35), transparent 70%),
+    radial-gradient(60% 50% at 85% -10%, oklch(0.22 0.05 20 / 90%), transparent 70%),
+    radial-gradient(45% 40% at -10% 20%, oklch(0.5 0.21 25 / 35%), transparent 70%),
     radial-gradient(50% 45% at 70% 110%, var(--accent-soft), transparent 70%),
     var(--bg);
   transition: background 1.2s ease;
@@ -110,7 +114,7 @@ input, select { font-family: inherit; }
   animation: sur 26s var(--ease) infinite alternate;
 }
 .aurora::before {
-  background: radial-gradient(circle, rgba(168, 83, 111, 0.35), transparent 65%);
+  background: radial-gradient(circle, oklch(0.5 0.21 25 / 35%), transparent 65%);
   top: -25vmax; right: -15vmax;
 }
 .aurora::after {
@@ -134,13 +138,13 @@ input, select { font-family: inherit; }
 /* Aydınlık modda aurora yumuşak sıcak tonlara döner */
 :root[data-tema="aydinlik"] .aurora {
   background:
-    radial-gradient(60% 50% at 85% -10%, rgba(217, 140, 166, 0.28), transparent 70%),
-    radial-gradient(45% 40% at -10% 20%, rgba(217, 155, 106, 0.2), transparent 70%),
+    radial-gradient(60% 50% at 85% -10%, oklch(0.7 0.15 30 / 28%), transparent 70%),
+    radial-gradient(45% 40% at -10% 20%, oklch(0.75 0.12 40 / 20%), transparent 70%),
     radial-gradient(50% 45% at 70% 110%, var(--accent-soft), transparent 70%),
     var(--bg);
 }
 :root[data-tema="aydinlik"] .aurora::before {
-  background: radial-gradient(circle, rgba(217, 140, 166, 0.3), transparent 65%);
+  background: radial-gradient(circle, oklch(0.7 0.15 30 / 30%), transparent 65%);
 }
 :root[data-tema="aydinlik"] .aurora::before,
 :root[data-tema="aydinlik"] .aurora::after { opacity: 0.6; }
@@ -155,8 +159,6 @@ input, select { font-family: inherit; }
 @media (max-width: 820px) { .grain { display: none; } }
 
 /* Aydınlık modda sabit koyu yüzeyler krem tonuna çevrilir */
-:root[data-tema="aydinlik"] .ustCubuk { background: rgba(247, 241, 232, 0.72); }
-:root[data-tema="aydinlik"] .altBar { background: rgba(247, 241, 232, 0.82); }
 :root[data-tema="aydinlik"] .girdi { background: rgba(255, 255, 255, 0.6); }
 :root[data-tema="aydinlik"] .siseSahne,
 :root[data-tema="aydinlik"] .detayVitrin,
@@ -167,10 +169,10 @@ input, select { font-family: inherit; }
 :root[data-tema="aydinlik"] .siseSahne:hover { background-color: rgba(255, 255, 255, 0.25); }
 :root[data-tema="aydinlik"] .kalpMini { background: rgba(255, 255, 255, 0.7); }
 :root[data-tema="aydinlik"] .filtreSecici {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232c1226' stroke-opacity='0.5' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23301612' stroke-opacity='0.5' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
 }
 /* SVG şişe etiketi ve cam çizgileri açık zeminde biraz koyulaşsın */
-:root[data-tema="aydinlik"] .sise { filter: drop-shadow(0 10px 16px rgba(74, 31, 66, 0.22)); }
+:root[data-tema="aydinlik"] .sise { filter: drop-shadow(0 10px 16px oklch(0.2 0.05 22 / 22%)); }
 
 /* ---------- Genel yapı ---------- */
 .kabuk {
@@ -180,13 +182,28 @@ input, select { font-family: inherit; }
   padding: 0 clamp(18px, 4vw, 40px) 120px;
   flex: 1;
 }
-/* Ajans hero tam ekran taştığından, onu saran .kabuk'un alt boşluğu kapatılır */
-.kabuk:has(.ajansHero) { padding-bottom: 0; }
 
 .girisAnim { animation: yukari var(--dur) var(--ease) both; }
 @keyframes yukari {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(18px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Parlayan vurgu metni — başlıklarda akan ışık şeridi */
+.parlamaMetin {
+  background: linear-gradient(100deg, var(--cream) 30%, var(--amber-bright) 50%, var(--cream) 70%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: parla 6s linear infinite;
+}
+@keyframes parla {
+  from { background-position: -160% 0; }
+  to { background-position: 260% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parlamaMetin { animation: none; }
 }
 
 h1, h2, h3, .serif {
@@ -206,18 +223,26 @@ h1, h2, h3, .serif {
 /* ---------- Üst çubuk ---------- */
 .ustCubuk {
   position: sticky; top: 0; z-index: 40;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  background: rgba(18, 5, 16, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: color-mix(in oklch, var(--bg) 62%, transparent);
   border-bottom: 1px solid var(--hairline);
+  border-radius: 0 0 20px 20px;
 }
 .ustCubukIc {
   max-width: 1120px; margin: 0 auto;
-  padding: 14px clamp(18px, 4vw, 40px);
+  padding: 12px clamp(18px, 4vw, 40px);
   display: flex; align-items: center; gap: 20px;
 }
-.logo { font-family: var(--font-serif); font-size: 21px; letter-spacing: 0.02em; color: var(--cream); }
+.logo { display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-serif); font-size: 19px; letter-spacing: 0.02em; color: var(--cream); }
 .logo em { font-style: italic; color: var(--accent); }
+.logoIkon {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent); color: var(--bg);
+  box-shadow: 0 0 20px -4px var(--blood);
+  flex-shrink: 0;
+}
 .logoBtn { transition: opacity 180ms var(--ease), transform 180ms var(--ease); }
 .logoBtn:hover { opacity: 0.82; transform: translateY(-1px); }
 .logoBtn:active { transform: translateY(0); }
@@ -229,7 +254,7 @@ h1, h2, h3, .serif {
   transition: all 200ms var(--ease);
 }
 .sekme:hover { color: var(--cream); background: var(--surface); }
-.sekme.aktif { color: var(--bg); background: var(--cream); font-weight: 600; }
+.sekme.aktif { color: var(--cream); background: var(--accent-soft); font-weight: 600; }
 
 /* ---------- Butonlar ---------- */
 .btn {
@@ -245,145 +270,98 @@ h1, h2, h3, .serif {
 .btnCizgi:hover { border-color: var(--cream-60); background: var(--surface); }
 .btnKucuk { padding: 9px 18px; font-size: 13px; }
 
-/* ---------- Karşılama — koyu "ajans stüdyo" hero ----------
-   Bu ekran kasıtlı olarak uygulamanın gündüz/gece temasından bağımsızdır:
-   sabit koyu lacivert-siyah zemin + tek vurgu rengi sarı, sinematik bir
-   giriş kapısı gibi davranır. App.tsx, hesap yokken temayı "koyu"ya sabitler. */
-.ajansHero {
-  /* .kabuk üst kapsayıcısının max-width'inden taşıp tam ekran genişliğine yayılır */
-  width: 100vw;
+/* ---------- Karşılama — "Boutique Noir" hero ----------
+   Kan kırmızısı likit + dramatik ışık huzmeli parfüm fotoğrafı, iki
+   sütunlu düzen; uygulamanın normal koyu/aydınlık temasını izler. */
+.heroYeni {
   position: relative;
-  left: 50%;
-  margin-left: -50vw;
-  min-height: 100dvh;
-  display: flex; flex-direction: column;
   overflow: hidden;
-  color: #fff;
+  padding: clamp(24px, 5vw, 56px) 0 clamp(32px, 6vw, 64px);
+}
+.heroBlob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(70px);
+  animation: heroSurukle 16s ease-in-out infinite;
+}
+.heroBlobA { left: -6rem; top: 2.5rem; width: 18rem; height: 18rem; background: oklch(0.5 0.21 25 / 40%); }
+.heroBlobB { right: -4rem; top: 10rem; width: 16rem; height: 16rem; background: oklch(0.65 0.19 40 / 25%); animation-delay: 3s; }
+@keyframes heroSurukle {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.15); opacity: 0.85; }
+}
+@media (prefers-reduced-motion: reduce) { .heroBlob { animation: none; } }
+@media (max-width: 820px) { .heroBlob { display: none; } }
+
+.heroIzgara {
+  position: relative; z-index: 1;
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+@media (min-width: 860px) {
+  .heroIzgara { grid-template-columns: 1fr 1fr; gap: 40px; }
 }
 
-/* Arka plan katmanı: derin lacivert zemin + sağ üstten godray + ASCII doku */
-.ajansZemin {
-  position: fixed; inset: 0; z-index: -10; pointer-events: none;
-  overflow: hidden;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ctext x='3' y='23' font-family='monospace' font-size='19' fill='%23ffffff' fill-opacity='0.05'%3E%7C%3C/text%3E%3C/svg%3E"),
-    radial-gradient(120% 95% at 83% 20%, #0a1c46 0%, #030d2b 45%, #010f14 78%, #010509 100%);
-  background-repeat: repeat, no-repeat;
-  background-size: 30px 30px, auto;
-}
-/* Yumuşak godray huzmesi — üst üste binen bulanık radial-gradient'ler,
-   ince tekrarlı desenler yerine (moiré riski olmadan) sağ üstten sızan
-   sıcak ışık hissi verir. */
-.ajansZemin::before {
-  content: "";
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(32% 55% at 92% 0%, rgba(252, 254, 255, 0.4), transparent 70%),
-    radial-gradient(24% 42% at 76% 6%, rgba(252, 254, 255, 0.2), transparent 72%),
-    radial-gradient(46% 68% at 98% 16%, rgba(181, 147, 24, 0.28), transparent 75%);
-  mix-blend-mode: screen;
-  filter: blur(8px);
-}
-.ajansZemin::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(38, 0, 255, 0.16), transparent 45%, rgba(255, 238, 3, 0.07));
-  mix-blend-mode: overlay;
-}
-@media (max-width: 720px) {
-  /* Mobilde tam ekran SVG doku tekrar boyaması pahalı — sadeleştir */
-  .ajansZemin {
-    background-image: radial-gradient(140% 90% at 85% 16%, #0a1c46 0%, #030d2b 50%, #010f14 82%, #010509 100%);
-  }
-}
-
-/* Fare imleç izi — yalnızca hassas işaretçili masaüstünde */
-.imlecIzi { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
-.imlecNokta {
-  position: absolute; width: 6px; height: 6px; margin: -3px 0 0 -3px;
-  border-radius: 50%; background: #ffee03;
-  box-shadow: 0 0 12px 3px rgba(255, 238, 3, 0.45);
-  transition: opacity 220ms linear;
-}
-
-/* Üst navigasyon — sol üstte minimal, alt alta dizili */
-.ajansNav {
-  position: relative; z-index: 2;
-  display: flex; flex-direction: column; gap: 10px;
-  padding: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 40px) 0;
-}
-.ajansNavOge {
+.heroMetin { display: flex; flex-direction: column; gap: 22px; }
+.heroRozet {
   align-self: flex-start;
-  font-size: 13px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  transition: color 200ms var(--ease);
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  color: var(--cream-60);
 }
-.ajansNavOge:hover { color: #fff; }
-.ajansNavAktif { display: inline-flex; align-items: center; gap: 4px; }
+.heroRozet svg { color: var(--accent); }
 
-/* Ana gövde — dev tipografi ortada */
-.ajansGovde {
-  position: relative; z-index: 2;
-  flex: 1;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 24px clamp(20px, 4vw, 40px);
+.heroBaslik {
+  font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  font-weight: 600;
 }
-.ajansBaslik {
-  font-family: "Space Grotesk", var(--font-sans), sans-serif;
-  font-weight: 700;
-  font-size: clamp(2.75rem, 11vw, 9rem);
-  line-height: 0.85;
-  letter-spacing: -0.03em;
-  display: flex; flex-direction: column;
-}
-.ajansSatir { display: block; }
-.ajansSatir.ajansVurgu {
-  font-family: "Nabla", "Space Grotesk", sans-serif;
-  font-weight: 400;
-  color: #ffee03;
+.heroBaslik em { font-style: italic; }
+
+.heroAciklama {
+  max-width: 34rem;
+  color: var(--cream-60);
+  font-size: clamp(15.5px, 1.6vw, 17px);
+  line-height: 1.55;
 }
 
-.ajansAlt {
-  margin-top: clamp(20px, 4vw, 40px);
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
-  flex-wrap: wrap;
+.heroBtnSira { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.heroBtnParla {
+  box-shadow: 0 0 30px -6px var(--blood);
+  transition: transform 240ms var(--ease), box-shadow 240ms var(--ease);
 }
-.ajansAciklama {
-  color: rgba(255, 255, 255, 0.55);
-  font-size: clamp(15px, 1.6vw, 17px);
-  max-width: 28rem;
-  line-height: 1.5;
-}
-.ajansCtaGrup { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.ajansCta {
-  display: inline-flex; align-items: center; gap: 12px;
-  padding: 15px 26px; border-radius: 999px;
-  font-size: 15px; font-weight: 600; color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  transition: background 300ms var(--ease), color 300ms var(--ease), transform 300ms var(--ease);
-}
-.ajansCta:hover { background: #fff; color: #030d2b; transform: translateY(-2px); }
-.ajansCtaOk { transition: transform 300ms var(--ease); }
-.ajansCta:hover .ajansCtaOk { transform: translateX(5px); }
-.ajansSure { color: rgba(255, 255, 255, 0.4); }
+.heroBtnParla:hover { transform: scale(1.03); }
+.heroBtnOk { transition: transform 240ms var(--ease); }
+.heroBtnParla:hover .heroBtnOk { transform: translateX(3px); }
 
-/* Alt bilgi çubuğu */
-.ajansFooter {
-  position: relative; z-index: 2;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 18px clamp(20px, 4vw, 40px);
-  background: #000;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+.heroIstat {
+  margin-top: 4px;
+  display: flex; align-items: center; gap: 20px;
+  font-size: 14px; color: var(--cream-60);
 }
-.ajansLogo { font-family: var(--font-serif); font-size: 15px; color: #fff; }
-.ajansLogo em { font-style: italic; color: #ffee03; }
-.ajansFooterMetin { color: rgba(255, 255, 255, 0.4); }
+.heroIstatSayi { font-family: var(--font-serif); font-size: 26px; color: var(--cream); line-height: 1.1; }
+.heroIstatCizgi { width: 1px; height: 32px; background: var(--hairline); flex-shrink: 0; }
 
-@media (max-width: 720px) {
-  .ajansAlt { flex-direction: column; align-items: flex-start; }
-  .ajansFooterMetin { display: none; }
+.heroGorselKutu { position: relative; }
+.heroFoto {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+}
+.heroFoto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.heroFotoFade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, var(--bg), transparent 55%);
+}
+@media (max-width: 859px) {
+  .heroFoto { max-height: 360px; }
 }
 
 /* koku partikülleri */
@@ -403,11 +381,32 @@ h1, h2, h3, .serif {
 
 /* ---------- Cam kart ---------- */
 .cam {
-  background: var(--surface);
+  background: linear-gradient(150deg, oklch(1 0 0 / 8%), oklch(1 0 0 / 2%)), var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Etkileşimli kartlarda (parfüm kartı, günün kokusu…) hover'da hafif kalkma
+   + kan kırmızısı kenarlık parıltısı — "camKart" olarak .cam'e eklenir. */
+.camKart {
+  transition: transform 0.5s var(--ease), box-shadow 0.5s ease, border-color 0.5s ease;
+  will-change: transform;
+}
+.camKart:hover {
+  transform: translateY(-6px);
+  border-color: oklch(0.5 0.21 25 / 55%);
+  box-shadow: 0 24px 60px -24px oklch(0.48 0.22 24 / 55%), inset 0 1px 0 oklch(1 0 0 / 10%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .camKart { transition: none; }
+  .camKart:hover { transform: none; }
+}
+@media (max-width: 820px) {
+  /* Mobilde hover yok; hafif transition maliyetini de kaldır */
+  .camKart { transition: border-color 0.3s ease; }
+  .camKart:hover { transform: none; box-shadow: none; }
 }
 
 /* ---------- Auth ---------- */
@@ -570,7 +569,7 @@ h1, h2, h3, .serif {
   flex-shrink: 0;
 }
 .kalp:hover { border-color: var(--rose); transform: scale(1.08); }
-.kalp.aktif { background: rgba(217, 140, 166, 0.18); border-color: var(--rose); animation: kalpAt 400ms var(--ease); }
+.kalp.aktif { background: var(--accent-soft); border-color: var(--rose); color: var(--rose); animation: kalpAt 400ms var(--ease); }
 @keyframes kalpAt { 40% { transform: scale(1.35); } }
 
 .tepki { width: 38px; height: 38px; font-size: 15px; border-radius: 50%; border: 1px solid transparent; opacity: 0.55; transition: all 200ms; display: flex; align-items: center; justify-content: center; }
@@ -690,15 +689,21 @@ h1, h2, h3, .serif {
 
 /* ---------- Alt gezinme (mobil) ---------- */
 .altBar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  position: fixed; left: 0; right: 0; z-index: 50;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  margin: 0 12px;
   display: none;
-  backdrop-filter: blur(18px);
-  background: rgba(18, 5, 16, 0.72);
-  border-top: 1px solid var(--hairline);
-  padding: 10px max(14px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-bottom));
+  border-radius: 20px;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: color-mix(in oklch, var(--bg) 78%, transparent);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow);
+  padding: 8px 6px;
 }
-.altBar .sekme { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; display: flex; flex-direction: column; gap: 3px; align-items: center; }
-.altBar .sekme .ikon { font-size: 20px; }
+.altBar .sekme { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; display: flex; flex-direction: column; gap: 3px; align-items: center; border-radius: 14px; }
+.altBar .sekme .ikon { display: flex; }
+.altBar .sekme.aktif .ikon { filter: drop-shadow(0 0 6px var(--blood)); }
 
 @media (max-width: 720px) {
   .sekmeler { display: none; }
@@ -715,8 +720,6 @@ h1, h2, h3, .serif {
     -webkit-backdrop-filter: none;
     background: var(--bg-2);
   }
-  :root[data-tema="aydinlik"] .ustCubuk,
-  :root[data-tema="aydinlik"] .altBar { background: #efe5d7; }
   /* kart hover büyütmeleri dokunmatikte gereksiz repaint; sadeleştir */
   .pKart:hover, .miniKart:hover, .okazyonKart:hover, .anlikKart:hover { transform: none; }
 }

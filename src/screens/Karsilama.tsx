@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useStore } from "../state/store";
 import { useDil } from "../i18n/DilContext";
+import heroNoir from "../assets/hero-noir.png";
 
 export function Karsilama({ onDevam }: { onDevam: () => void }) {
   const { t } = useDil();
@@ -8,84 +10,66 @@ export function Karsilama({ onDevam }: { onDevam: () => void }) {
   if (authAcik) return <AuthEkrani ilkMod={authAcik} onGeri={() => setAuthAcik(false)} onBasari={onDevam} />;
 
   return (
-    <div className="ajansHero girisAnim">
-      <div className="ajansZemin" aria-hidden />
-      <ImlecIzi />
+    <section className="heroYeni">
+      <div className="heroBlob heroBlobA" aria-hidden />
+      <div className="heroBlob heroBlobB" aria-hidden />
 
-      <nav className="ajansNav">
-        <span className="ajansNavOge">{t("kesfet.baslik")}</span>
-        <span className="ajansNavOge">{t("notalar.baslik")}</span>
-        <button className="ajansNavOge ajansNavAktif" onClick={() => setAuthAcik("giris")}>
-          {t("auth.giris")} ↗
-        </button>
-      </nav>
+      <div className="heroIzgara">
+        <div className="heroMetin girisAnim">
+          <span className="heroRozet">
+            <Sparkles size={14} />
+            {t("karsilama.ust")}
+          </span>
 
-      <div className="ajansGovde">
-        <h1 className="ajansBaslik">
-          <span className="ajansSatir">{t("karsilama.satir1")}</span>
-          <span className="ajansSatir">{t("karsilama.satir2")}</span>
-          <span className="ajansSatir ajansVurgu">{t("karsilama.satir3")}</span>
-        </h1>
-        <div className="ajansAlt">
-          <p className="ajansAciklama">{t("karsilama.alt")}</p>
-          <div className="ajansCtaGrup">
-            <button className="ajansCta" onClick={() => setAuthAcik("kayit")}>
-              <span>{t("karsilama.baslaCta")}</span>
-              <span className="ajansCtaOk">→</span>
+          <h1 className="heroBaslik">
+            {t("karsilama.imza1")}
+            <br />
+            <em className="parlamaMetin">{t("karsilama.imza2")}</em>
+          </h1>
+
+          <p className="heroAciklama">{t("karsilama.alt")}</p>
+
+          <div className="heroBtnSira">
+            <button className="btn btnAna heroBtnParla" onClick={() => setAuthAcik("kayit")}>
+              {t("karsilama.baslaCta")}
+              <ArrowRight size={16} className="heroBtnOk" />
             </button>
-            <span className="ajansSure minik">{t("karsilama.sure")}</span>
+            <button className="btn btnCizgi" onClick={() => setAuthAcik("giris")}>
+              {t("auth.girisBtn")}
+            </button>
+          </div>
+
+          <div className="heroIstat">
+            <div>
+              <p className="heroIstatSayi">29K+</p>
+              <p>{t("karsilama.istatParfum")}</p>
+            </div>
+            <span className="heroIstatCizgi" />
+            <div>
+              <p className="heroIstatSayi">10</p>
+              <p>{t("karsilama.istatDil")}</p>
+            </div>
+            <span className="heroIstatCizgi" />
+            <div>
+              <p className="heroIstatSayi">%96</p>
+              <p>{t("karsilama.istatEslesme")}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="heroGorselKutu girisAnim" style={{ animationDelay: "0.15s" }}>
+          <div className="heroFoto cam">
+            <img
+              src={heroNoir}
+              alt="Kan kırmızısı likit dolu lüks parfüm şişesi, dramatik ışık huzmesi"
+              width={720}
+              height={860}
+            />
+            <div className="heroFotoFade" aria-hidden />
           </div>
         </div>
       </div>
-
-      <footer className="ajansFooter">
-        <span className="ajansLogo">⚗️ Frag <em>Tasting</em></span>
-        <span className="ajansFooterMetin minik">{t("karsilama.ust")}</span>
-      </footer>
-    </div>
-  );
-}
-
-// Fareyi izleyen, kısa süre sonra sönümlenen sarı iz noktaları.
-// Yalnızca hassas işaretçili (masaüstü) cihazlarda ve hareket azaltma
-// kapalıyken çalışır — dokunmatik/erişilebilirlik maliyeti yok.
-function ImlecIzi() {
-  const [noktalar, setNoktalar] = useState<{ x: number; y: number; id: number }[]>([]);
-  const sayac = useRef(0);
-  const sonZaman = useRef(0);
-
-  useEffect(() => {
-    const hassas = window.matchMedia("(pointer: fine)").matches;
-    const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!hassas || azHareket) return;
-
-    function hareket(e: MouseEvent) {
-      const simdi = performance.now();
-      if (simdi - sonZaman.current < 35) return;
-      sonZaman.current = simdi;
-      const id = sayac.current++;
-      setNoktalar((n) => [...n.slice(-11), { x: e.clientX, y: e.clientY, id }]);
-    }
-    window.addEventListener("mousemove", hareket);
-    return () => window.removeEventListener("mousemove", hareket);
-  }, []);
-
-  useEffect(() => {
-    if (!noktalar.length) return;
-    const zaman = setTimeout(() => setNoktalar((n) => n.slice(1)), 250);
-    return () => clearTimeout(zaman);
-  }, [noktalar]);
-
-  return (
-    <div className="imlecIzi" aria-hidden>
-      {noktalar.map((n, i) => (
-        <span
-          key={n.id}
-          className="imlecNokta"
-          style={{ left: n.x, top: n.y, opacity: ((i + 1) / noktalar.length) * 0.8 }}
-        />
-      ))}
-    </div>
+    </section>
   );
 }
 
@@ -116,7 +100,7 @@ function AuthEkrani({
     <div className="girisAnim">
       <form className="authKutu cam" onSubmit={gonder}>
         <span className="ustBaslik">{mod === "kayit" ? t("auth.hesapOlustur") : t("auth.giris")}</span>
-        <h2>{mod === "kayit" ? t("karsilama.satir2") + " " + t("karsilama.satir3") : t("nav.anaEkran")}</h2>
+        <h2>{mod === "kayit" ? t("karsilama.imza1") + " " + t("karsilama.imza2") : t("nav.anaEkran")}</h2>
 
         {mod === "kayit" && (
           <div className="alanGrup">

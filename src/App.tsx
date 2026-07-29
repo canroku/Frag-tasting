@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, Layers, Droplets, Compass, User } from "lucide-react";
 import { useStore } from "./state/store";
 import { Aurora } from "./components/ui";
 import { sayfaGecisi } from "./components/gecis";
@@ -39,15 +40,12 @@ export default function App() {
     tamKatalogYukle();
   }, []);
 
-  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır.
-  // Girişsiz karşılama ekranı (ajans hero) kasıtlı olarak hep koyudur —
-  // gündüz/gece tercihi yalnızca hesap açıldıktan sonra geçerli olur.
-  const temaEfektif = hesap ? tema : "koyu";
+  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır
   useEffect(() => {
-    document.documentElement.dataset.tema = temaEfektif;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", temaEfektif === "aydinlik" ? "#f7f1e8" : "#14060f");
+    document.documentElement.dataset.tema = tema;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "aydinlik" ? "#f7f1e8" : "#14060f");
     localStorage.setItem("frag_tema", tema);
-  }, [tema, temaEfektif]);
+  }, [tema]);
 
   const temaDegis = () => sayfaGecisi(() => setTema((t) => (t === "koyu" ? "aydinlik" : "koyu")), "sekme");
 
@@ -74,11 +72,11 @@ export default function App() {
 
   return (
     <>
-      {hesap && <Aurora />}
+      <Aurora />
       {!girisliVeAnketli && (
         <div className="serbestUst">
           <DilSecici />
-          {hesap && <TemaBtn tema={tema} onDegis={temaDegis} serbest />}
+          <TemaBtn tema={tema} onDegis={temaDegis} serbest />
         </div>
       )}
       {girisliVeAnketli && (
@@ -90,6 +88,7 @@ export default function App() {
               title="Ana ekran — Senin Seçkin"
               aria-label="Ana ekrana dön"
             >
+              <span className="logoIkon"><Droplets size={15} /></span>
               Frag <em>Tasting</em>
             </button>
             <nav className="sekmeler">
@@ -145,19 +144,19 @@ export default function App() {
       {girisliVeAnketli && (
         <nav className="altBar">
           <button className={`sekme ${sekme === "onerilerim" ? "aktif" : ""}`} onClick={() => sekmeyeGec("onerilerim")}>
-            <span className="ikon">✦</span>{t("nav.oneriler")}
+            <span className="ikon"><Sparkles size={19} /></span>{t("nav.oneriler")}
           </button>
           <button className={`sekme ${sekme === "koleksiyonlar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("koleksiyonlar")}>
-            <span className="ikon">📚</span>{t("nav.koleksiyonlar")}
+            <span className="ikon"><Layers size={19} /></span>{t("nav.koleksiyonlar")}
           </button>
           <button className={`sekme ${sekme === "notalar" ? "aktif" : ""}`} onClick={() => sekmeyeGec("notalar")}>
-            <span className="ikon">🌿</span>{t("nav.notalar")}
+            <span className="ikon"><Droplets size={19} /></span>{t("nav.notalar")}
           </button>
           <button className={`sekme ${sekme === "kesfet" ? "aktif" : ""}`} onClick={() => sekmeyeGec("kesfet")}>
-            <span className="ikon">⌕</span>{t("nav.kesfet")}
+            <span className="ikon"><Compass size={19} /></span>{t("nav.kesfet")}
           </button>
           <button className={`sekme ${sekme === "profil" ? "aktif" : ""}`} onClick={() => sekmeyeGec("profil")}>
-            <span className="ikon">♡</span>{t("nav.profil")}
+            <span className="ikon"><User size={19} /></span>{t("nav.profil")}
           </button>
         </nav>
       )}

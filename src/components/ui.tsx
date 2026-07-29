@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Heart } from "lucide-react";
 import type { Parfum, Oneri, Aile, Cinsiyet } from "../engine/types";
 import { AILE_ETIKET, AILE_RENK, fragranticaLink } from "../engine/types";
 import { NOTA_MAP, KATEGORI_RENK, notaAd } from "../data/notes";
@@ -289,7 +290,7 @@ export function ParfumKart({
   const sahneRenk = AILE_RENK[(aileler[0]?.[0] ?? "amber") as Aile];
 
   return (
-    <article className="pKart cam" style={{ ["--i" as string]: sira }}>
+    <article className="pKart cam camKart" style={{ ["--i" as string]: sira }}>
       <button
         className="siseSahne"
         style={{ ["--sahne" as string]: sahneRenk }}
@@ -343,7 +344,7 @@ export function ParfumKart({
           onClick={() => favoriToggle(parfum.id)}
           aria-label={favori ? "Favorilerden çıkar" : "Favorilere ekle"}
         >
-          {favori ? "❤️" : "🤍"}
+          <Heart size={16} fill={favori ? "currentColor" : "none"} />
         </button>
         <button
           className={`tepki ${tepki === "begen" ? "aktif" : ""}`}

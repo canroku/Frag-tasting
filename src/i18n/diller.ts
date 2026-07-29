@@ -33,9 +33,11 @@ const S: Record<string, Satir> = {
 
   // Karşılama
   "karsilama.ust": ["Kişisel Koku Danışmanın", "Your Personal Scent Advisor", "Dein persönlicher Duftberater", "Ton conseiller parfum personnel", "Tu asesor de fragancias personal", "Il tuo consulente di profumi", "Твой личный парфюмерный советник", "مستشار العطور الشخصي", "Seu consultor de fragrâncias", "你的私人香氛顾问"],
-  "karsilama.satir1": ["Kendi", "Discover", "Entdecke", "Découvre", "Descubre", "Scopri", "Найди", "اكتشف", "Descubra", "发现"],
-  "karsilama.satir2": ["Kokunu", "Your Own", "Deinen Eigenen", "Ton Propre", "Tu Propio", "Il Tuo", "Свой", "عطرك", "Seu Próprio", "专属于你的"],
-  "karsilama.satir3": ["Keşfet", "Scent", "Duft", "Parfum", "Aroma", "Profumo", "Аромат", "الخاص", "Aroma", "香气"],
+  "karsilama.imza1": ["Kokun,", "Your scent,", "Dein Duft,", "Ton parfum,", "Tu aroma,", "Il tuo profumo,", "Твой аромат —", "عطرك،", "Seu aroma,", "你的香气，"],
+  "karsilama.imza2": ["senin imzan.", "is your signature.", "ist deine Signatur.", "est ta signature.", "es tu firma.", "è la tua firma.", "твоя подпись.", "توقيعك الخاص.", "é sua assinatura.", "就是你的签名。"],
+  "karsilama.istatParfum": ["parfüm", "perfumes", "Parfums", "parfums", "perfumes", "profumi", "ароматов", "عطر", "perfumes", "款香水"],
+  "karsilama.istatDil": ["dil", "languages", "Sprachen", "langues", "idiomas", "lingue", "языков", "لغة", "idiomas", "种语言"],
+  "karsilama.istatEslesme": ["eşleşme", "match", "Übereinstimmung", "correspondance", "coincidencia", "corrispondenza", "совпадение", "تطابق", "correspondência", "匹配度"],
   "karsilama.alt": [
     "Yaşını, karakterini ve koku zevkini anlayan kişisel bir koku danışmanı. Kısa bir tadım anketi — sana en yakın 10–15 parfüm, nedenleriyle birlikte.",
     "A personal advisor that understands your age, character and scent taste. A short tasting survey — your closest 10–15 perfumes, with reasons.",

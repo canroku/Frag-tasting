@@ -245,7 +245,7 @@ function GununKokusu({ oneri, onDetay }: { oneri: Oneri; onDetay: (p: Oneri["par
 
   return (
     <section
-      className="gununKokusu cam"
+      className="gununKokusu cam camKart"
       style={{ ["--sahne" as string]: AILE_RENK[anaAile] }}
     >
       <div className="gununSise">

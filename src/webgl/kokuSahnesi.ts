@@ -24,6 +24,7 @@ export class KokuSahnesi {
   private kivilcimlar!: THREE.Points;
   private kivilcimVeri: { hx: number; hy: number; hz: number; salinimHiz: number; salinimYaricap: number; faz: number }[] = [];
   private bgUniform: { uTime: { value: number }; uResolution: { value: THREE.Vector2 }; uMouse: { value: THREE.Vector2 }; uScroll: { value: number } };
+  private ortamHedefi: THREE.WebGLRenderTarget | null = null;
 
   private hedefScroll = 0;
   private yumusakScroll = 0;
@@ -64,8 +65,9 @@ export class KokuSahnesi {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.35;
+    this.renderer.toneMappingExposure = 1.1;
 
+    this.kurOrtamHaritasi();
     this.kurIsiklar();
     this.olusturKivilcimlar();
     this.olusturSise();
@@ -73,12 +75,54 @@ export class KokuSahnesi {
     this.rafId = requestAnimationFrame(this.animate);
   }
 
-  // ---------- Işıklandırma: dramatik tek yönlü chiaroscuro ----------
+  /* ---------- Stüdyo ortam haritası ----------
+     Camın "cam gibi" görünmesinin asıl sebebi yansımadır: ışık kaynağının
+     kendisi değil, yansıdığı parlak yüzeyler. Burada ürün fotoğrafçılığındaki
+     softbox düzeni prosedürel olarak kurulup PMREM ile ortam haritasına
+     çevrilir — camın kenarlarındaki uzun dikey parlamalar buradan gelir. */
+  private kurOrtamHaritasi() {
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    const studyo = new THREE.Scene();
+    studyo.background = new THREE.Color(0x04060b);
+
+    const softbox = (
+      w: number, h: number, renk: number, guc: number,
+      konum: [number, number, number], donme: [number, number, number] = [0, 0, 0]
+    ) => {
+      const mat = new THREE.MeshBasicMaterial({ color: renk });
+      mat.color.multiplyScalar(guc); // HDR: PMREM yarı-float hedefe render eder, 1'in üstü korunur
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+      mesh.position.set(...konum);
+      mesh.rotation.set(...donme);
+      studyo.add(mesh);
+    };
+
+    // Klasik ürün çekimi: iki uzun dikey şerit ışık (camın kenar parlamaları),
+    // tepeden geniş bir softbox, arkadan sıcak bir vurgu.
+    softbox(1.2, 9, 0xffffff, 7.0, [-5, 0, 1.5], [0, Math.PI / 2, 0]);
+    softbox(0.9, 9, 0xdce8ff, 5.0, [5, 0, 0.5], [0, -Math.PI / 2, 0]);
+    softbox(8, 3.5, 0xffffff, 3.2, [0, 5.5, 0], [Math.PI / 2, 0, 0]);
+    softbox(5, 4, 0xff6a3c, 2.4, [1.5, 0.5, -6], [0, 0, 0]);
+    softbox(6, 2, 0x2a1410, 1.0, [0, -4.5, 0], [-Math.PI / 2, 0, 0]);
+
+    this.ortamHedefi = pmrem.fromScene(studyo, 0.04);
+    this.scene.environment = this.ortamHedefi.texture;
+
+    studyo.traverse((o) => {
+      if (o instanceof THREE.Mesh) { o.geometry.dispose(); (o.material as THREE.Material).dispose(); }
+    });
+    pmrem.dispose();
+  }
+
+  /* ---------- Işıklandırma ----------
+     Ortam haritası artık genel aydınlatmayı ve yansımaları taşıdığı için
+     ışıklar yalnızca yön ve kontrast veriyor; eski (env'siz) değerlerinin
+     çok altındalar, yoksa cam yanıp beyaza doyuyordu. */
   private kurIsiklar() {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.12);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.04);
     this.scene.add(ambient);
 
-    const anaIsik = new THREE.SpotLight(0xfff0e0, 14.0);
+    const anaIsik = new THREE.SpotLight(0xfff0e0, 7.0);
     anaIsik.position.set(4, 6, 3);
     anaIsik.angle = Math.PI / 4;
     anaIsik.penumbra = 0.9;
@@ -86,14 +130,21 @@ export class KokuSahnesi {
     anaIsik.shadow.mapSize.set(2048, 2048);
     anaIsik.shadow.camera.near = 1.0;
     anaIsik.shadow.camera.far = 15;
-    anaIsik.shadow.bias = -0.001;
+    anaIsik.shadow.bias = -0.0015;
+    anaIsik.shadow.radius = 4;
     this.scene.add(anaIsik);
 
-    const kenarIsik = new THREE.DirectionalLight(0x7fb8ff, 8.5);
+    const kenarIsik = new THREE.DirectionalLight(0x8fc0ff, 2.6);
     kenarIsik.position.set(-5, 3, -4);
     this.scene.add(kenarIsik);
 
-    const dolduranIsik = new THREE.DirectionalLight(0xffd9b3, 0.7);
+    // Arkadan geçen ışık — likidin içinden sızıp parfümü "ışıldatan" ışık.
+    // Şeffaf malzemede derinliğe göre renklenmeyi görünür kılan asıl kaynak.
+    const arkaIsik = new THREE.PointLight(0xff8a5c, 6.0, 12, 2);
+    arkaIsik.position.set(-0.6, 0.5, -2.2);
+    this.scene.add(arkaIsik);
+
+    const dolduranIsik = new THREE.DirectionalLight(0xffd9b3, 0.35);
     dolduranIsik.position.set(-2, -4, 2);
     this.scene.add(dolduranIsik);
   }
@@ -163,116 +214,168 @@ export class KokuSahnesi {
     this.scene.add(this.kivilcimlar);
   }
 
-  // ---------- Şişe: LatheGeometry ile prosedürel olarak inşa edilir ----------
+  /* ---------- Şişe ----------
+     Prosedürel flakon. Gerçekçilik için üç şey kritik:
+     1) Silüet spline'dan 90 noktaya örneklenir → köşeli bant yerine akıcı omuz.
+     2) Gövde z ekseninde yassılaştırılır → silindir değil, gerçek flakon oranı.
+     3) Renk boyadan değil, likidin kalınlığa bağlı soğurmasından (attenuation)
+        gelir: kenarlar açık, göbek koyu — gerçek şişelerdeki derinlik hissi. */
   private olusturSise() {
     this.sise = new THREE.Group();
     this.scene.add(this.sise);
 
-    // Silüet profili (x = eksenden uzaklık, y = yükseklik) — taban→omuz→boyun→ağız
-    const profil = [
-      new THREE.Vector2(0.0, 0.0),
-      new THREE.Vector2(0.62, 0.0),
-      new THREE.Vector2(0.66, 0.04),
-      new THREE.Vector2(0.66, 0.86),
-      new THREE.Vector2(0.6, 0.98),
-      new THREE.Vector2(0.42, 1.08),
-      new THREE.Vector2(0.2, 1.14),
-      new THREE.Vector2(0.19, 1.15),
-      new THREE.Vector2(0.19, 1.34),
-      new THREE.Vector2(0.24, 1.34),
-      new THREE.Vector2(0.24, 1.15),
-    ].map((v) => new THREE.Vector2(v.x, v.y));
+    // Yassı flakon oranı; dönme dış grupta, yassılaştırma içeride kalır.
+    const govde = new THREE.Group();
+    govde.scale.set(1, 1, 0.58);
+    this.sise.add(govde);
 
-    const disGeo = new THREE.LatheGeometry(profil, 48);
+    // Silüet kontrol noktaları (x = eksenden uzaklık, y = yükseklik)
+    const kontrol = [
+      new THREE.Vector2(0.001, 0.0),
+      new THREE.Vector2(0.40, 0.0),
+      new THREE.Vector2(0.62, 0.005),
+      new THREE.Vector2(0.68, 0.055),
+      new THREE.Vector2(0.695, 0.16),
+      new THREE.Vector2(0.695, 0.70),
+      new THREE.Vector2(0.685, 0.85),
+      new THREE.Vector2(0.63, 0.97),
+      new THREE.Vector2(0.50, 1.07),
+      new THREE.Vector2(0.34, 1.13),
+      new THREE.Vector2(0.235, 1.17),
+      new THREE.Vector2(0.205, 1.22),
+      new THREE.Vector2(0.20, 1.33),
+    ];
+    const profil = new THREE.SplineCurve(kontrol).getPoints(90);
+
+    const disGeo = new THREE.LatheGeometry(profil, 128);
+    // Gerçek optik cam: tam iletim + kalınlık + kırılma indisi.
     const disMat = new THREE.MeshPhysicalMaterial({
-      color: 0xfff3e8,
-      metalness: 0.05,
-      roughness: 0.06,
-      transmission: 0.92,
-      thickness: 0.5,
-      ior: 1.45,
-      transparent: true,
-      opacity: 0.55,
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.035,
+      transmission: 1,
+      thickness: 0.32,
+      ior: 1.52,
       clearcoat: 1,
-      clearcoatRoughness: 0.05,
-      side: THREE.DoubleSide,
+      clearcoatRoughness: 0.02,
+      envMapIntensity: 1.7,
+      transparent: true,
+      side: THREE.FrontSide,
     });
     const disMesh = new THREE.Mesh(disGeo, disMat);
     disMesh.castShadow = true;
-    disMesh.receiveShadow = true;
 
-    // İç likit — camın biraz içinde, doygun kan kırmızısı-amber
-    const likitProfil = profil
-      .filter((v) => v.y <= 0.92)
-      .map((v) => new THREE.Vector2(Math.max(0, v.x - 0.045), v.y));
-    const likitGeo = new THREE.LatheGeometry(likitProfil, 48);
+    // Likit: aynı silüetin içe kaydırılmış hâli, dolum çizgisinde düz yüzeyle kapanır
+    const dolumY = 0.76;
+    const likitNokta: THREE.Vector2[] = [];
+    for (const p of profil) {
+      if (p.y <= dolumY) likitNokta.push(new THREE.Vector2(Math.max(0.001, p.x - 0.05), p.y));
+    }
+    const yuzeyR = likitNokta[likitNokta.length - 1]?.x ?? 0.6;
+    for (let i = 1; i <= 10; i++) {
+      likitNokta.push(new THREE.Vector2(yuzeyR * (1 - i / 10) + 0.001, dolumY));
+    }
+    const likitGeo = new THREE.LatheGeometry(likitNokta, 128);
+    /* Likit bilerek transmission KULLANMIYOR: three.js, iletim (refraction)
+       geçişini çizerken sahnedeki diğer iletken nesneleri hariç tutar — likit
+       de iletken olsaydı camın arkasında hiç görünmezdi. Opak ama parlak ve
+       hafif kendinden ışıklı bir malzeme, camın kırılma tamponuna girer ve
+       şişenin içinden gerçekten görünür. */
     const likitMat = new THREE.MeshPhysicalMaterial({
-      color: 0xb8322a,
-      emissive: 0x5a0f0c,
-      emissiveIntensity: 0.35,
-      metalness: 0.15,
-      roughness: 0.12,
-      transmission: 0.55,
-      thickness: 1.2,
-      ior: 1.35,
-      transparent: true,
-      opacity: 0.96,
+      color: 0x8e1c14,
+      metalness: 0,
+      roughness: 0.14,
+      clearcoat: 1,
+      clearcoatRoughness: 0.08,
+      emissive: 0x4a0a06,
+      emissiveIntensity: 0.55,
+      envMapIntensity: 1.1,
+      side: THREE.FrontSide,
     });
     const likitMesh = new THREE.Mesh(likitGeo, likitMat);
-    likitMesh.castShadow = true;
 
-    // Kapak — metalik altın-bronz
-    const kapakGeo = new THREE.CylinderGeometry(0.27, 0.24, 0.22, 32);
-    const kapakMat = new THREE.MeshStandardMaterial({ color: 0xcaa25a, metalness: 0.92, roughness: 0.32 });
-    const kapakMesh = new THREE.Mesh(kapakGeo, kapakMat);
-    kapakMesh.position.y = 1.45;
-    kapakMesh.castShadow = true;
+    // Kapak: koyu, mat-metal blok + ince altın bilezik (referans fotoğraftaki gibi)
+    const kapakMat = new THREE.MeshStandardMaterial({
+      color: 0x15100e, metalness: 1, roughness: 0.28, envMapIntensity: 1.5,
+    });
+    const kapak = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.275, 0.30, 64, 1, false), kapakMat);
+    kapak.position.y = 1.44;
+    kapak.castShadow = true;
 
-    // Etiket plakası — küçük dokulu bir plaka
-    const etiketGeo = new THREE.PlaneGeometry(0.62, 0.34);
+    const bilezikMat = new THREE.MeshStandardMaterial({
+      color: 0xd8b06a, metalness: 1, roughness: 0.18, envMapIntensity: 1.8,
+    });
+    const bilezik = new THREE.Mesh(new THREE.CylinderGeometry(0.225, 0.225, 0.05, 64), bilezikMat);
+    bilezik.position.y = 1.275;
+    bilezik.castShadow = true;
+
+    // Etiket: gövdenin eğrisine oturan ince kabuk (düz plaka "yapıştırma" duruyordu)
+    const etiketGeo = new THREE.CylinderGeometry(0.702, 0.702, 0.36, 64, 1, true, -0.62, 1.24);
     const etiketMat = new THREE.MeshStandardMaterial({
-      color: 0x120806,
-      metalness: 0.1,
-      roughness: 0.55,
       map: this.olusturEtiketTeksturu(),
       transparent: true,
+      metalness: 0.25,
+      roughness: 0.45,
+      envMapIntensity: 0.8,
+      side: THREE.DoubleSide,
     });
-    const etiketMesh = new THREE.Mesh(etiketGeo, etiketMat);
-    etiketMesh.position.set(0, 0.62, 0.665);
+    const etiket = new THREE.Mesh(etiketGeo, etiketMat);
+    etiket.position.y = 0.52;
 
-    this.sise.add(disMesh, likitMesh, kapakMesh, etiketMesh);
+    govde.add(disMesh, likitMesh, kapak, bilezik, etiket);
 
-    // Ölçekle + tam merkeze al (bel yüksekliği referans alınarak)
+    // Ölçekle + tam merkeze al
     const kutu = new THREE.Box3().setFromObject(this.sise);
     const boyut = kutu.getSize(new THREE.Vector3());
     const maxBoyut = Math.max(boyut.x, boyut.y, boyut.z);
-    const hedefOlcek = 2.6 / (maxBoyut || 1);
-    this.sise.scale.setScalar(hedefOlcek);
+    this.sise.scale.setScalar(2.6 / (maxBoyut || 1));
     this.sise.updateMatrixWorld(true);
 
-    const kutu2 = new THREE.Box3().setFromObject(this.sise);
-    const merkez = kutu2.getCenter(new THREE.Vector3());
+    const merkez = new THREE.Box3().setFromObject(this.sise).getCenter(new THREE.Vector3());
     this.sise.position.sub(merkez);
     this.sise.position.y -= 0.15;
   }
 
+  /* Etiket dokusu. Silindir kabuğun UV'si tüm çevreyi kapladığından doku da
+     tam genişliktir; yazı yalnızca ortadaki dar şeride basılır, kalanı
+     saydam kalır — böylece etiket şişenin sadece ön yüzünde görünür. */
   private olusturEtiketTeksturu(): THREE.CanvasTexture {
+    const G = 1024, Y = 320;
     const c = document.createElement("canvas");
-    c.width = 256; c.height = 140;
+    c.width = G; c.height = Y;
     const ctx = c.getContext("2d")!;
-    ctx.fillStyle = "rgba(18,8,6,0.001)";
-    ctx.fillRect(0, 0, 256, 140);
-    ctx.strokeStyle = "rgba(202,162,90,0.7)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(8, 8, 240, 124);
-    ctx.fillStyle = "#f2e6d8";
+    ctx.clearRect(0, 0, G, Y);
+
+    const ox = G / 2, oy = Y / 2;
     ctx.textAlign = "center";
-    ctx.font = "24px Georgia, serif";
-    ctx.fillText("FRAG", 128, 64);
-    ctx.font = "italic 20px Georgia, serif";
-    ctx.fillStyle = "#caa25a";
-    ctx.fillText("Tasting", 128, 96);
-    return new THREE.CanvasTexture(c);
+    ctx.textBaseline = "middle";
+
+    // İnce altın çerçeve
+    ctx.strokeStyle = "rgba(216,176,106,0.85)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(ox - 210, oy - 118, 420, 236);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(ox - 199, oy - 107, 398, 214);
+
+    ctx.fillStyle = "#f6ece0";
+    ctx.font = "600 62px Georgia, 'Times New Roman', serif";
+    ctx.letterSpacing = "14px";
+    ctx.fillText("FRAG", ox, oy - 38);
+
+    ctx.fillStyle = "#d8b06a";
+    ctx.font = "italic 54px Georgia, 'Times New Roman', serif";
+    ctx.letterSpacing = "2px";
+    ctx.fillText("Tasting", ox, oy + 30);
+
+    ctx.letterSpacing = "8px";
+    ctx.fillStyle = "rgba(246,236,224,0.62)";
+    ctx.font = "20px Georgia, serif";
+    ctx.fillText("EAU DE PARFUM", ox, oy + 88);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    return tex;
   }
 
   // ---------- Arka plan: yavaş nefes alan likit dalga shader'ı ----------
@@ -419,15 +522,17 @@ export class KokuSahnesi {
 
     // Kamera 360° yörünge
     const phi = this.yumusakScroll * Math.PI * 2.0;
-    const y = 0.35 + Math.sin(this.yumusakScroll * Math.PI) * 0.8;
-    const radius = 4.0 - Math.sin(this.yumusakScroll * Math.PI) * 0.6;
+    const y = 0.3 + Math.sin(this.yumusakScroll * Math.PI) * 0.8;
+    // Şişe kadraja tam otursun diye yarıçap geniş tutulur; orta kaydırmada
+    // hafifçe yaklaşıp yine uzaklaşır.
+    const radius = 4.9 - Math.sin(this.yumusakScroll * Math.PI) * 0.6;
     const x = radius * Math.sin(phi);
     const z = radius * Math.cos(phi);
 
     const gecis = Math.min(1.0, this.yumusakScroll / 0.28);
     const yumusatma = (Math.cos(gecis * Math.PI) + 1.0) * 0.5;
-    const bakisXKaydirma = -0.9 * yumusatma;
-    const hedefBakis = new THREE.Vector3(bakisXKaydirma, -0.1, 0);
+    const bakisXKaydirma = -1.05 * yumusatma;
+    const hedefBakis = new THREE.Vector3(bakisXKaydirma, -0.05, 0);
     const hedefKonum = new THREE.Vector3(x, y, z);
     this.camera.position.lerp(hedefKonum, 0.03);
     this.camera.lookAt(hedefBakis);
@@ -443,14 +548,23 @@ export class KokuSahnesi {
   yoketme() {
     this.durduruldu = true;
     cancelAnimationFrame(this.rafId);
-    this.renderer.dispose();
     this.scene.traverse((obj) => {
       if (obj instanceof THREE.Mesh || obj instanceof THREE.Points) {
         obj.geometry?.dispose();
         const mat = obj.material;
-        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
-        else mat?.dispose();
+        const bosalt = (m: THREE.Material) => {
+          const kaynak = m as unknown as Record<string, unknown>;
+          for (const anahtar of ["map", "alphaMap", "emissiveMap"]) {
+            (kaynak[anahtar] as THREE.Texture | undefined)?.dispose();
+          }
+          m.dispose();
+        };
+        if (Array.isArray(mat)) mat.forEach(bosalt);
+        else if (mat) bosalt(mat);
       }
     });
+    this.ortamHedefi?.dispose();
+    this.scene.environment = null;
+    this.renderer.dispose();
   }
 }

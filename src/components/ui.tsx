@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Heart } from "lucide-react";
 import type { Parfum, Oneri, Aile, Cinsiyet } from "../engine/types";
@@ -10,6 +10,8 @@ import { toplulukVerisi, oyFormat } from "../engine/topluluk";
 import { gorselKaynak } from "../data/gorsel";
 import { useStore } from "../state/store";
 import { useKatalogSurumu } from "../state/useKatalog";
+import { useDil } from "../i18n/DilContext";
+import { DILLER, type Dil } from "../i18n/diller";
 
 export function Aurora() {
   return (
@@ -17,6 +19,44 @@ export function Aurora() {
       <div className="aurora" aria-hidden />
       <div className="grain" aria-hidden />
     </>
+  );
+}
+
+// Dil seçici — bayrak düğmesi + açılır liste. 10 dil, RTL destekli.
+// Üst çubukta ve karşılama hero'sunun kendi başlığında paylaşılan bileşen.
+export function DilSecici() {
+  const { dil, setDil } = useDil();
+  const [acik, setAcik] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const mevcut = DILLER.find((d) => d.kod === dil) ?? DILLER[0];
+
+  useEffect(() => {
+    if (!acik) return;
+    const disari = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setAcik(false); };
+    window.addEventListener("mousedown", disari);
+    return () => window.removeEventListener("mousedown", disari);
+  }, [acik]);
+
+  return (
+    <div className="dilSecici" ref={ref}>
+      <button className="dilBtn" onClick={() => setAcik((a) => !a)} title={mevcut.ad} aria-label="Dil / Language">
+        <span className="dilBayrak">{mevcut.bayrak}</span>
+        <span className="dilKod">{mevcut.kod.toUpperCase()}</span>
+      </button>
+      {acik && (
+        <div className="dilListe">
+          {DILLER.map((d) => (
+            <button
+              key={d.kod}
+              className={`dilOge ${d.kod === dil ? "aktif" : ""}`}
+              onClick={() => { setDil(d.kod as Dil); setAcik(false); }}
+            >
+              <span className="dilBayrak">{d.bayrak}</span> {d.ad}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

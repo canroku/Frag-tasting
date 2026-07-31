@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { lazy, Suspense, useState } from "react";
 import { useStore } from "../state/store";
 import { useDil } from "../i18n/DilContext";
-import heroNoir from "../assets/hero-noir.png";
+
+// Three.js + WebGL sahnesi (~500KB) ayrı bir parçada — yalnızca girişsiz
+// ziyaretçi karşılama ekranına geldiğinde indirilir, giriş yapmış kullanıcının
+// paketini şişirmez.
+const KokuHero = lazy(() => import("../components/KokuHero").then((m) => ({ default: m.KokuHero })));
 
 export function Karsilama({ onDevam }: { onDevam: () => void }) {
   const { t } = useDil();
@@ -10,66 +13,9 @@ export function Karsilama({ onDevam }: { onDevam: () => void }) {
   if (authAcik) return <AuthEkrani ilkMod={authAcik} onGeri={() => setAuthAcik(false)} onBasari={onDevam} />;
 
   return (
-    <section className="heroYeni">
-      <div className="heroBlob heroBlobA" aria-hidden />
-      <div className="heroBlob heroBlobB" aria-hidden />
-
-      <div className="heroIzgara">
-        <div className="heroMetin girisAnim">
-          <span className="heroRozet">
-            <Sparkles size={14} />
-            {t("karsilama.ust")}
-          </span>
-
-          <h1 className="heroBaslik">
-            {t("karsilama.imza1")}
-            <br />
-            <em className="parlamaMetin">{t("karsilama.imza2")}</em>
-          </h1>
-
-          <p className="heroAciklama">{t("karsilama.alt")}</p>
-
-          <div className="heroBtnSira">
-            <button className="btn btnAna heroBtnParla" onClick={() => setAuthAcik("kayit")}>
-              {t("karsilama.baslaCta")}
-              <ArrowRight size={16} className="heroBtnOk" />
-            </button>
-            <button className="btn btnCizgi" onClick={() => setAuthAcik("giris")}>
-              {t("auth.girisBtn")}
-            </button>
-          </div>
-
-          <div className="heroIstat">
-            <div>
-              <p className="heroIstatSayi">29K+</p>
-              <p>{t("karsilama.istatParfum")}</p>
-            </div>
-            <span className="heroIstatCizgi" />
-            <div>
-              <p className="heroIstatSayi">10</p>
-              <p>{t("karsilama.istatDil")}</p>
-            </div>
-            <span className="heroIstatCizgi" />
-            <div>
-              <p className="heroIstatSayi">%96</p>
-              <p>{t("karsilama.istatEslesme")}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="heroGorselKutu girisAnim" style={{ animationDelay: "0.15s" }}>
-          <div className="heroFoto cam">
-            <img
-              src={heroNoir}
-              alt="Kan kırmızısı likit dolu lüks parfüm şişesi, dramatik ışık huzmesi"
-              width={720}
-              height={860}
-            />
-            <div className="heroFotoFade" aria-hidden />
-          </div>
-        </div>
-      </div>
-    </section>
+    <Suspense fallback={<div className="kokuYukleniyor" aria-hidden />}>
+      <KokuHero onBasla={() => setAuthAcik("kayit")} onGiris={() => setAuthAcik("giris")} />
+    </Suspense>
   );
 }
 

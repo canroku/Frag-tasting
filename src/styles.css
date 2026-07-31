@@ -270,100 +270,6 @@ h1, h2, h3, .serif {
 .btnCizgi:hover { border-color: var(--cream-60); background: var(--surface); }
 .btnKucuk { padding: 9px 18px; font-size: 13px; }
 
-/* ---------- Karşılama — "Boutique Noir" hero ----------
-   Kan kırmızısı likit + dramatik ışık huzmeli parfüm fotoğrafı, iki
-   sütunlu düzen; uygulamanın normal koyu/aydınlık temasını izler. */
-.heroYeni {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(24px, 5vw, 56px) 0 clamp(32px, 6vw, 64px);
-}
-.heroBlob {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(70px);
-  animation: heroSurukle 16s ease-in-out infinite;
-}
-.heroBlobA { left: -6rem; top: 2.5rem; width: 18rem; height: 18rem; background: oklch(0.5 0.21 25 / 40%); }
-.heroBlobB { right: -4rem; top: 10rem; width: 16rem; height: 16rem; background: oklch(0.65 0.19 40 / 25%); animation-delay: 3s; }
-@keyframes heroSurukle {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
-  50% { transform: translate3d(3%, -4%, 0) scale(1.15); opacity: 0.85; }
-}
-@media (prefers-reduced-motion: reduce) { .heroBlob { animation: none; } }
-@media (max-width: 820px) { .heroBlob { display: none; } }
-
-.heroIzgara {
-  position: relative; z-index: 1;
-  display: grid;
-  gap: 32px;
-  align-items: center;
-}
-@media (min-width: 860px) {
-  .heroIzgara { grid-template-columns: 1fr 1fr; gap: 40px; }
-}
-
-.heroMetin { display: flex; flex-direction: column; gap: 22px; }
-.heroRozet {
-  align-self: flex-start;
-  display: inline-flex; align-items: center; gap: 8px;
-  border: 1px solid var(--hairline);
-  background: var(--surface-2);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12.5px;
-  color: var(--cream-60);
-}
-.heroRozet svg { color: var(--accent); }
-
-.heroBaslik {
-  font-size: clamp(2.6rem, 6.5vw, 4.6rem);
-  line-height: 0.98;
-  letter-spacing: -0.01em;
-  font-weight: 600;
-}
-.heroBaslik em { font-style: italic; }
-
-.heroAciklama {
-  max-width: 34rem;
-  color: var(--cream-60);
-  font-size: clamp(15.5px, 1.6vw, 17px);
-  line-height: 1.55;
-}
-
-.heroBtnSira { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.heroBtnParla {
-  box-shadow: 0 0 30px -6px var(--blood);
-  transition: transform 240ms var(--ease), box-shadow 240ms var(--ease);
-}
-.heroBtnParla:hover { transform: scale(1.03); }
-.heroBtnOk { transition: transform 240ms var(--ease); }
-.heroBtnParla:hover .heroBtnOk { transform: translateX(3px); }
-
-.heroIstat {
-  margin-top: 4px;
-  display: flex; align-items: center; gap: 20px;
-  font-size: 14px; color: var(--cream-60);
-}
-.heroIstatSayi { font-family: var(--font-serif); font-size: 26px; color: var(--cream); line-height: 1.1; }
-.heroIstatCizgi { width: 1px; height: 32px; background: var(--hairline); flex-shrink: 0; }
-
-.heroGorselKutu { position: relative; }
-.heroFoto {
-  position: relative;
-  overflow: hidden;
-  border-radius: 28px;
-}
-.heroFoto img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.heroFotoFade {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, var(--bg), transparent 55%);
-}
-@media (max-width: 859px) {
-  .heroFoto { max-height: 360px; }
-}
-
 /* koku partikülleri */
 .partikuller { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .partikul {
@@ -1228,3 +1134,185 @@ html[data-gecis="geri"]::view-transition-new(soru) {
 ::-webkit-scrollbar { width: 10px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ============================================================
+   KOKU HERO — sinematik, kaydırma güdümlü WebGL karşılama sahnesi
+   ============================================================ */
+
+/* Özel imleç yalnızca bu sahne aktifken devrede; native imleç gizlenir */
+body.kokuImlecAktif { cursor: none; }
+body.kokuImlecAktif * { cursor: none !important; }
+
+.kokuImlecIc {
+  position: fixed; top: 0; left: 0;
+  width: 6px; height: 6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+}
+.kokuImlecDis {
+  position: fixed; top: 0; left: 0;
+  width: 40px; height: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9998;
+}
+@media (pointer: coarse) {
+  .kokuImlecIc, .kokuImlecDis { display: none; }
+}
+
+/* Kaydırma uzunluğunu oluşturan görünmez blok — görsel içerik tamamen fixed */
+.kokuUzunluk { width: 100%; height: 900vh; }
+.kokuYukleniyor { position: fixed; inset: 0; background: #000; z-index: 1; }
+
+#koku-webgl {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  outline: none;
+}
+
+/* ---------- Üst çubuk ---------- */
+.kokuUst {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: max(20px, env(safe-area-inset-top)) clamp(20px, 5vw, 60px) 0;
+  pointer-events: auto;
+}
+.kokuMarka { font-family: var(--font-serif); font-size: 16px; letter-spacing: 0.04em; color: #fff; }
+.kokuMarka em { font-style: italic; color: var(--ember); }
+.kokuNav { display: flex; align-items: center; gap: 28px; }
+.kokuNavLink {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 500;
+  transition: color 300ms var(--ease);
+}
+.kokuNavLink:hover { color: #fff; }
+.kokuCta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: 999px;
+  background: #fff; color: #14060a;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+  transition: transform 300ms var(--ease), background 300ms var(--ease);
+}
+.kokuCta:hover { transform: scale(1.05); background: #f0e6dd; }
+.kokuCtaCember { width: 6px; height: 6px; border: 1px solid #14060a; border-radius: 50%; }
+.kokuAksiyon { display: flex; align-items: center; gap: 14px; }
+@media (max-width: 780px) {
+  .kokuNav { display: none; }
+}
+
+/* ---------- Yatay ayraç + dikey ızgara ---------- */
+.kokuYatayCizgi {
+  position: fixed; top: 66px; left: 0; right: 0; height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 5; pointer-events: none;
+}
+.kokuIzgara {
+  position: fixed; top: 0; left: 40px; right: 40px; height: 100vh;
+  display: flex; justify-content: space-between;
+  z-index: 5; pointer-events: none;
+}
+@media (max-width: 780px) { .kokuIzgara, .kokuYatayCizgi { display: none; } }
+.kokuSatir { position: relative; width: 1px; height: 100%; background: rgba(255, 255, 255, 0.12); }
+.kokuSatir.kokuIlerlemeSutun { margin-top: 66px; height: calc(100vh - 66px); }
+.kokuNokta {
+  position: absolute; left: 50%; transform: translate(-50%, -50%);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+}
+.kokuDashlar {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.kokuDash { width: 2px; height: 40px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+.kokuDashDolgu { width: 100%; height: 0%; background: #fff; border-radius: 2px; }
+
+/* ---------- Slaytlar ---------- */
+.kokuSlaytKumesi { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+.kokuSlayt { position: absolute; bottom: 13%; }
+.kokuSlayt.aktif { pointer-events: auto; }
+
+.kokuBaslik {
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 6.2vw, 100px);
+  line-height: 1.0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  margin-bottom: 20px;
+  color: #fff6ed;
+}
+.kokuBaslik .char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(50px);
+  filter: blur(12px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.kokuSlayt.aktif .kokuBaslik .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+.kokuAciklama {
+  font-size: 16px; line-height: 1.7; font-weight: 300;
+  color: #d1d5db; letter-spacing: 0.02em;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s;
+}
+.kokuSlayt.aktif .kokuAciklama { opacity: 1; transform: translateY(0); }
+
+/* Slayt 1: başlık sol + iki açıklama sütunu */
+.kokuSlayt1 { left: 0; width: 100%; }
+.kokuSlayt1 .kokuBaslik { margin-left: clamp(20px, 5vw, 60px); }
+.kokuAciklamaSira { position: relative; display: flex; width: 100%; }
+.kokuCol1 { margin-left: clamp(20px, 5vw, 60px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+.kokuCol2 { position: absolute; left: calc(25vw + 40px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+
+/* Slayt 2: editoryal görsel maskesi + başlık/açıklama sağda */
+.kokuGorselMaske {
+  position: fixed; top: 90px; left: clamp(20px, 5vw, 60px);
+  width: calc(25vw - 60px); aspect-ratio: 1 / 1;
+  overflow: hidden; z-index: 2; pointer-events: none;
+  clip-path: inset(0 0 100% 0); opacity: 0;
+  transition: clip-path 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+  border-radius: 10px;
+}
+.kokuGorselMaske img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.kokuGorselMaske.aktif { clip-path: inset(0 0 0 0); opacity: 1; }
+.kokuGorselMaske.aktif img { transform: scale(1); }
+
+.kokuSlayt2 { left: 0; width: 100%; }
+.kokuSlayt2 .kokuBaslik { margin-left: calc(25vw + 40px); }
+.kokuSlayt2Desc { margin-left: calc(50vw + 20px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+
+/* Slayt 3: tek sütun, orta-sağ */
+.kokuSlayt3 { left: calc(50vw + 20px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+.kokuSlayt3 .kokuBaslik { white-space: nowrap; }
+
+/* Slayt 4: geniş tek blok, giriş bağlantısı içerir */
+.kokuSlayt4 { left: calc(25% + 40px); max-width: 600px; }
+.kokuGirisLink {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  color: #fff; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 4px;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s,
+              border-color 240ms var(--ease), color 240ms var(--ease);
+}
+.kokuSlayt.aktif .kokuGirisLink { opacity: 1; transform: translateY(0); }
+.kokuGirisLink:hover { border-color: var(--ember); color: var(--ember); }
+
+/* Mobil: 5 kolonlu vw ızgarası okunaksızlaşır — yığılmış, tam genişlik düzene geç */
+@media (max-width: 900px) {
+  .kokuGorselMaske { display: none; }
+  .kokuSlayt { position: fixed; left: 20px !important; right: 20px; bottom: 14%; width: auto !important; max-width: none !important; }
+  .kokuSlayt1 .kokuBaslik, .kokuSlayt2 .kokuBaslik { margin-left: 0; }
+  .kokuAciklamaSira { flex-direction: column; gap: 14px; }
+  .kokuCol1, .kokuCol2 { position: static; width: 100%; max-width: none; margin-left: 0; }
+  .kokuSlayt2Desc { margin-left: 0; width: 100%; max-width: none; }
+  .kokuBaslik { font-size: clamp(38px, 11vw, 60px); }
+}

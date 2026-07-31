@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Sparkles, Layers, Droplets, Compass, User } from "lucide-react";
 import { useStore } from "./state/store";
-import { Aurora } from "./components/ui";
+import { Aurora, DilSecici } from "./components/ui";
 import { sayfaGecisi } from "./components/gecis";
 import { useDil } from "./i18n/DilContext";
-import { DILLER, type Dil } from "./i18n/diller";
 import { tamKatalogYukle } from "./data/catalog";
 import { Karsilama } from "./screens/Karsilama";
 import { Anket } from "./screens/Anket";
@@ -40,12 +39,15 @@ export default function App() {
     tamKatalogYukle();
   }, []);
 
-  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır
+  // Tema kökte data-tema olarak uygulanır + kalıcılaştırılır.
+  // Girişsiz karşılama (sinematik koku hero'su) her zaman siyah zeminlidir —
+  // gündüz/gece tercihi yalnızca hesap açıldıktan sonra devreye girer.
+  const temaEfektif = hesap ? tema : "koyu";
   useEffect(() => {
-    document.documentElement.dataset.tema = tema;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tema === "aydinlik" ? "#f7f1e8" : "#14060f");
+    document.documentElement.dataset.tema = temaEfektif;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", temaEfektif === "aydinlik" ? "#f7f1e8" : "#14060f");
     localStorage.setItem("frag_tema", tema);
-  }, [tema]);
+  }, [tema, temaEfektif]);
 
   const temaDegis = () => sayfaGecisi(() => setTema((t) => (t === "koyu" ? "aydinlik" : "koyu")), "sekme");
 
@@ -73,7 +75,9 @@ export default function App() {
   return (
     <>
       <Aurora />
-      {!girisliVeAnketli && (
+      {/* Karşılama'nın kendi başlığı (kokuUst) dil seçiciyi zaten içeriyor;
+          bu serbest çubuk yalnızca hesap açılmış ama anket bitmemişken gösterilir. */}
+      {!girisliVeAnketli && hesap && (
         <div className="serbestUst">
           <DilSecici />
           <TemaBtn tema={tema} onDegis={temaDegis} serbest />
@@ -169,43 +173,6 @@ function SekmeBtn({ aktif, onClick, children }: { aktif: boolean; onClick: () =>
     <button className={`sekme ${aktif ? "aktif" : ""}`} onClick={onClick}>
       {children}
     </button>
-  );
-}
-
-// Dil seçici — bayrak düğmesi + açılır liste. 10 dil, RTL destekli.
-function DilSecici() {
-  const { dil, setDil } = useDil();
-  const [acik, setAcik] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const mevcut = DILLER.find((d) => d.kod === dil) ?? DILLER[0];
-
-  useEffect(() => {
-    if (!acik) return;
-    const disari = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setAcik(false); };
-    window.addEventListener("mousedown", disari);
-    return () => window.removeEventListener("mousedown", disari);
-  }, [acik]);
-
-  return (
-    <div className="dilSecici" ref={ref}>
-      <button className="dilBtn" onClick={() => setAcik((a) => !a)} title={mevcut.ad} aria-label="Dil / Language">
-        <span className="dilBayrak">{mevcut.bayrak}</span>
-        <span className="dilKod">{mevcut.kod.toUpperCase()}</span>
-      </button>
-      {acik && (
-        <div className="dilListe">
-          {DILLER.map((d) => (
-            <button
-              key={d.kod}
-              className={`dilOge ${d.kod === dil ? "aktif" : ""}`}
-              onClick={() => { setDil(d.kod as Dil); setAcik(false); }}
-            >
-              <span className="dilBayrak">{d.bayrak}</span> {d.ad}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 
